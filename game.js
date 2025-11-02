@@ -22,18 +22,20 @@ let targetWords = pickRandomWords(NUM_WORDS_TO_SHOW);
 // For each word, track how many letters have been correctly matched so far.
 // e.g., [2, 4, 1] means: word1 has 2 letters filled, word2 has 4, etc.
 let progressByWord = targetWords.map(() => 0);
+let victory = false;
 
 // Keep a record of all letters the player has typed (for display and scoring)
 let typedLetters = [];
 
 // Cached DOM references 
 const wordsContainer = document.getElementById("words");
-const typedDisplay = document.getElementById("typed");
-const scoreDisplay = document.getElementById("score");
+const typedDisplay   = document.getElementById("typed");
+const scoreDisplay   = document.getElementById("score");
 
 function reset() {
   typedLetters = [];
   progressByWord = targetWords.map(() => 0);
+  victory = false;
   render();
 }
 
@@ -99,7 +101,8 @@ function handleKey(event) {
     (p, i) => p >= targetWords[i].length
   );
 
-  if (allComplete) {
+  if (allComplete && !victory) {
+    victory = true;
     setTimeout(() => {
       alert(
         `Completed in ${typedLetters.length} letters!\nWords: ${targetWords.join(", ")}`
