@@ -1,0 +1,45 @@
+body {
+  font-family: sans-serif;
+  text-align: center;
+  margin-top: 4rem;
+}
+
+.word {
+  font-size: 2rem;
+  letter-spacing: 0.1em;
+  margin: 0.2em;
+  display: inline-block;
+  transition: color 0.3s ease;
+}
+
+/* Finished words */
+.word.complete {
+  color: #38c938;
+  font-weight: bold;
+}
+
+/* Partially typed words */
+.filled {
+  color: #4eaf51;
+}
+
+/* Next letter in an unfinished word */
+.next {
+  opacity: 0.5;
+  text-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+  transition: opacity 0.3s ease, text-shadow 0.3s ease;
+}
+
+.remaining {
+  opacity: 0.3;
+}
+
+.word:not(.complete):hover .next {
+  opacity: 0.8;
+  text-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
+}
+
+.word.complete .filled {
+  color: inherit; /* inherits the green from .word.complete */
+  opacity: 1;     /* make sure everything’s fully visible */
+}

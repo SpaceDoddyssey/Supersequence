@@ -55,19 +55,21 @@ function render() {
   const wordElements = targetWords.map((word, i) => {
     const filledCount = progressByWord[i];
     const filledPart = word.slice(0, filledCount);
-    const remainingPart = word.slice(filledCount);
+    const nextChar = word[filledCount] || "";
+    const remainingPart = word.slice(filledCount + 1);
     const complete = filledCount >= word.length;
 
-    return `
-      <div class="word ${complete ? "complete" : ""}">
-        <span>${filledPart}</span>
-        <span style="opacity:0.3">${remainingPart}</span>
-      </div>
-    `;
+      return `
+        <div class="word ${complete ? "complete" : ""}">
+          <span class="filled">${filledPart}</span>
+          ${!complete ? `<span class="next">${nextChar}</span><span 
+          class="remaining">${remainingPart}</span>` : ""}
+        </div><br>
+      `;
   });
 
   wordsContainer.innerHTML = wordElements.join("");
-  typedDisplay.textContent = "Typed: " + typedLetters.join("");
+  typedDisplay.textContent = "Your Sequence: " + typedLetters.join("");
 }
 
 // MARK: Input
