@@ -12,6 +12,23 @@ body {
   transition: color 0.3s ease;
 }
 
+#words {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* When we have many words, switch to grid layout */
+#words.grid-layout {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(200px, 1fr));
+  justify-items: center;
+  justify-content: center;
+  align-content: start;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
 /* Finished words */
 .word.complete {
   color: #38c938;

@@ -64,9 +64,15 @@ function render() {
           <span class="filled">${filledPart}</span>
           ${!complete ? `<span class="next">${nextChar}</span><span 
           class="remaining">${remainingPart}</span>` : ""}
-        </div><br>
+        </div>
       `;
   });
+
+  if (targetWords.length > 5) {
+    wordsContainer.classList.add("grid-layout");
+  } else {
+    wordsContainer.classList.remove("grid-layout");
+  }
 
   wordsContainer.innerHTML = wordElements.join("");
   typedDisplay.textContent = "Your Sequence: " + typedLetters.join("");
