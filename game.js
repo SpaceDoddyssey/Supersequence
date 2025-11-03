@@ -36,6 +36,7 @@ function reset() {
   typedLetters = [];
   progressByWord = targetWords.map(() => 0);
   victory = false;
+  scoreDisplay.textContent = ``;
   render();
 }
 
@@ -52,31 +53,44 @@ function updateWordCount(dropdown) {
 //MARK: Rendering
 // Redraws the list of words and the typed sequence on screen.
 function render() {
-  const wordElements = targetWords.map((word, i) => {
+  targetWords.forEach((word, i) => {
+    let wordEl = wordsContainer.children[i];
     const filledCount = progressByWord[i];
-    const filledPart = word.slice(0, filledCount);
-    const nextChar = word[filledCount] || "";
-    const remainingPart = word.slice(filledCount + 1);
     const complete = filledCount >= word.length;
 
-      return `
-        <div class="word ${complete ? "complete" : ""}">
-          <span class="filled">${filledPart}</span>
-          ${!complete ? `<span class="next">${nextChar}</span><span 
-          class="remaining">${remainingPart}</span>` : ""}
-        </div>
-      `;
+    if (!wordEl) {
+      // Create element on first render
+      wordEl = document.createElement("div");
+      wordEl.classList.add("word");
+      wordsContainer.appendChild(wordEl);
+
+      // Create child spans
+      const filledSpan = document.createElement("span");
+      filledSpan.classList.add("filled");
+      wordEl.appendChild(filledSpan);
+
+      const nextSpan = document.createElement("span");
+      nextSpan.classList.add("next");
+      wordEl.appendChild(nextSpan);
+
+      const remainingSpan = document.createElement("span");
+      remainingSpan.classList.add("remaining");
+      wordEl.appendChild(remainingSpan);
+    }
+
+    wordEl.classList.toggle("complete", complete);
+
+    const [filledSpan, nextSpan, remainingSpan] = wordEl.children;
+
+    filledSpan.textContent = word.slice(0, filledCount);
+    nextSpan.textContent = complete ? "" : word[filledCount] || "";
+    remainingSpan.textContent = complete ? "" : word.slice(filledCount + 1);
   });
 
-  if (targetWords.length > 5) {
-    wordsContainer.classList.add("grid-layout");
-  } else {
-    wordsContainer.classList.remove("grid-layout");
-  }
-
-  wordsContainer.innerHTML = wordElements.join("");
   typedDisplay.textContent = "Your Sequence: " + typedLetters.join("");
 }
+
+
 
 // MARK: Input
 function handleKey(event) {
@@ -111,11 +125,7 @@ function handleKey(event) {
 
   if (allComplete && !victory) {
     victory = true;
-    setTimeout(() => {
-      alert(
-        `Completed in ${typedLetters.length} letters!\nWords: ${targetWords.join(", ")}`
-      );
-    }, 100);
+    scoreDisplay.innerHTML = `Completed in <span class="value">${typedLetters.length}</span> letters`
   }
 }
 

@@ -4,6 +4,10 @@ body {
   margin-top: 4rem;
 }
 
+h1 {
+    font-size: 4em;
+}
+
 .word {
   font-size: 2rem;
   letter-spacing: 0.1em;
@@ -16,6 +20,20 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+#score {
+  min-height: 1.2em;
+  font-size: 4rem;
+  font-weight: bold;
+}
+
+#score .value {
+    color: #38c938;
+}
+
+#spacer{
+  min-height: 2em;
 }
 
 /* When we have many words, switch to grid layout */
@@ -33,11 +51,17 @@ body {
 .word.complete {
   color: #38c938;
   font-weight: bold;
+  transition: color 0.25s ease, transform 0.25s ease;
 }
 
 /* Partially typed words */
 .filled {
-  color: #4eaf51;
+  color: #cfc840;
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.filled::after {
+  content: " "; /* preserves spacing between spans */
 }
 
 /* Next letter in an unfinished word */
