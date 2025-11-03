@@ -2,10 +2,41 @@ body {
   font-family: sans-serif;
   text-align: center;
   margin-top: 4rem;
+  background-color: #FFFDF5;
 }
 
 h1 {
     font-size: 4em;
+}
+
+button {
+  border-radius: 5px;
+  border:1px solid #333;
+  font-weight: bold;
+  letter-spacing: 1px;
+  padding: 0.5em 1em;
+  cursor: pointer;
+  transition: all 0.05s ease-in-out;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+button:active {
+  transform: scale(0.95);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+select {
+  font-weight: bold;
+  font-size: 0.9rem;
+  padding: 0.4em 0.6em;
+  border-radius: 5px;
+  background-color: #F9F9F9;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
 }
 
 .word {

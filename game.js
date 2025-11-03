@@ -46,6 +46,7 @@ function newWords(){
 }
 
 function updateWordCount(dropdown) {
+  wordsContainer.innerHTML = ""
   NUM_WORDS_TO_SHOW = parseInt(dropdown.value, 10);
   newWords();
 }
@@ -86,6 +87,12 @@ function render() {
     nextSpan.textContent = complete ? "" : word[filledCount] || "";
     remainingSpan.textContent = complete ? "" : word.slice(filledCount + 1);
   });
+
+  if (targetWords.length > 5) {
+    wordsContainer.classList.add("grid-layout");
+  } else {
+    wordsContainer.classList.remove("grid-layout");
+  }
 
   typedDisplay.textContent = "Your Sequence: " + typedLetters.join("");
 }
