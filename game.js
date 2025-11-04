@@ -43,20 +43,29 @@ function reset() {
 function newWords(){
   targetWords = pickRandomWords(NUM_WORDS_TO_SHOW);
   reset();
-  findMinSolutionAsync(
-  targetWords,
-  (update) => {
-    if (update.processed % 20000 === 0)
-      console.log(
-        `Processed ${update.processed} states | Queue: ${update.queueSize}`
-      );
-  },
-  (best, processed) => {
-    console.log(`Finished. Best = ${best}, total states = ${processed}`);
-  }
-);
-
+  // compareSolvers(targetWords);
 }
+
+// function testNewWords(){
+//   targetWords = ["PIRONE",
+//   "BRITER",
+//   "BALLOON",
+//   "GRANT",
+//   'FLAMBE',
+//   "FROSTY",
+//   "RIDER"]
+//   reset();
+//   compareSolvers(targetWords);
+// }
+
+// async function testSolvers() {
+//   let agreement = false;
+//   do {
+//     targetWords = pickRandomWords(NUM_WORDS_TO_SHOW);
+//     reset();
+//     agreement = await compareSolvers(targetWords); // properly await the async function
+//   } while (agreement); // repeat until solvers agree
+// }
 
 function updateWordCount(dropdown) {
   wordsContainer.innerHTML = ""
@@ -157,17 +166,5 @@ function handleKey(event) {
 
 
 window.addEventListener("keydown", handleKey);
-findMinSolutionAsync(
-  targetWords,
-  (update) => {
-    if (update.processed % 20000 === 0)
-      console.log(
-        `Processed ${update.processed} states | Queue: ${update.queueSize}`
-      );
-  },
-  (best, processed) => {
-    console.log(`Finished. Best = ${best}, total states = ${processed}`);
-  }
-);
-
+// compareSolvers(targetWords);
 render();

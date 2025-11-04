@@ -14,9 +14,16 @@
   </p>
   <button type="button" id="resetButton" onclick="reset()">Reset</button>
   <button type="button" id="newWordsButton" onclick="newWords()">Get New Words</button>
+  <!-- <button type="button" id="testWordsButton" onclick="testNewWords()">Test Words</button>
+  <button type="button" id="testSolversButton" onclick="testSolvers()">Test Solvers</button> -->
+  <!-- Default to 3 words -->
   <select name="wordCount" id="wordCountDropdown" onChange="updateWordCount(this)">
-    <option value="3">3 words</option>
+    <option value="3" selected>3 words</option>
     <option value="5">5 words</option>
+    <!-- <option value="6">6 words</option>
+    <option value="7">7 words</option>
+    <option value="8">8 words</option>
+    <option value="9">9 words</option> -->
     <option value="10">10 words</option>
     <option value="20">20 words</option>
     <option value="30">30 words</option>
