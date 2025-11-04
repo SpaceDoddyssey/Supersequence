@@ -86,6 +86,13 @@ function render() {
     filledSpan.textContent = word.slice(0, filledCount);
     nextSpan.textContent = complete ? "" : word[filledCount] || "";
     remainingSpan.textContent = complete ? "" : word.slice(filledCount + 1);
+
+    wordEl.onclick = () => {
+      if (complete || victory) return;
+      const nextLetter = word[filledCount];
+      if (!nextLetter) return;
+      inputLetter(nextLetter);
+    };
   });
 
   if (targetWords.length > 5) {
@@ -100,41 +107,41 @@ function render() {
 
 
 // MARK: Input
-function handleKey(event) {
-  const letter = event.key.toUpperCase();
+function inputLetter(letter) {
+  letter = letter.toUpperCase();
   if (letter < "A" || letter > "Z") return;
 
   let advancedAnyWord = false;
 
-  // Check each target word.
   progressByWord = progressByWord.map((progress, i) => {
     const word = targetWords[i];
     const nextLetter = word[progress];
     const isMatch = nextLetter === letter;
-
     if (isMatch) {
       advancedAnyWord = true;
-      return progress + 1; // move to next letter
+      return progress + 1;
     }
-
-    return progress; // unchanged
+    return progress;
   });
 
-  // Only count keys that made progress.
   if (advancedAnyWord) typedLetters.push(letter);
-
   render();
 
-  // === Win condition ===
   const allComplete = progressByWord.every(
     (p, i) => p >= targetWords[i].length
   );
 
   if (allComplete && !victory) {
     victory = true;
-    scoreDisplay.innerHTML = `Completed in <span class="value">${typedLetters.length}</span> letters`
+    scoreDisplay.innerHTML = `Completed in <span class="value">${typedLetters.length}</span> letters`;
   }
 }
+
+function handleKey(event) {
+  inputLetter(event.key);
+}
+
+
 
 window.addEventListener("keydown", handleKey);
 render();
