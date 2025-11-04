@@ -1,12 +1,14 @@
 body {
   font-family: sans-serif;
   text-align: center;
-  margin-top: 4rem;
+  margin-top: 1rem;
   background-color: #FFFDF5;
 }
 
 h1 {
     font-size: 4em;
+    margin-top: 0.1em;
+    margin-bottom: 0.2em;
 }
 
 button {
@@ -40,11 +42,15 @@ select {
 }
 
 .word {
-  font-size: 2rem;
+  font-size: 2.4rem;
   letter-spacing: 0.1em;
   margin: 0.2em;
   display: inline-block;
   transition: color 0.3s ease;
+  white-space: nowrap;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  padding: 0.0rem 0.6rem;
+  border-radius: 10px;
 }
 
 #words {
@@ -70,12 +76,13 @@ select {
 /* When we have many words, switch to grid layout */
 #words.grid-layout {
   display: grid;
-  grid-template-columns: repeat(5, minmax(200px, 1fr));
+  grid-template-columns: repeat(5, minmax(max-content, 1fr));
   justify-items: center;
   justify-content: center;
   align-content: start;
-  max-width: 900px;
+  max-width: 90%;
   margin: 0 auto;
+  white-space: nowrap;
 }
 
 /* Finished words */

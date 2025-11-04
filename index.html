@@ -12,14 +12,6 @@
     If multiple words have the same next letter, it will advance them all<br>
     Fill these words in as few letters as possible
   </p>
-  
-  <div id="words"></div>
-
-  <div id="spacer"></div>
-  <div id="typed"></div>
-  <div id="score"></div>
-
-  <br>
   <button type="button" id="resetButton" onclick="reset()">Reset</button>
   <button type="button" id="newWordsButton" onclick="newWords()">Get New Words</button>
   <select name="wordCount" id="wordCountDropdown" onChange="updateWordCount(this)">
@@ -29,7 +21,15 @@
     <option value="20">20 words</option>
     <option value="30">30 words</option>
   </select>
-  <br>
+  <br><br><br>
+  
+
+  <div id="words"></div>
+
+  <div id="spacer"></div>
+  <div id="typed"></div>
+  <div id="score"></div>
+  <br><br>
 
   <script src="words.js"></script>
   <script src="game.js"></script>
