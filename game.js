@@ -43,6 +43,19 @@ function reset() {
 function newWords(){
   targetWords = pickRandomWords(NUM_WORDS_TO_SHOW);
   reset();
+  findMinSolutionAsync(
+  targetWords,
+  (update) => {
+    if (update.processed % 20000 === 0)
+      console.log(
+        `Processed ${update.processed} states | Queue: ${update.queueSize}`
+      );
+  },
+  (best, processed) => {
+    console.log(`Finished. Best = ${best}, total states = ${processed}`);
+  }
+);
+
 }
 
 function updateWordCount(dropdown) {
@@ -144,4 +157,17 @@ function handleKey(event) {
 
 
 window.addEventListener("keydown", handleKey);
+findMinSolutionAsync(
+  targetWords,
+  (update) => {
+    if (update.processed % 20000 === 0)
+      console.log(
+        `Processed ${update.processed} states | Queue: ${update.queueSize}`
+      );
+  },
+  (best, processed) => {
+    console.log(`Finished. Best = ${best}, total states = ${processed}`);
+  }
+);
+
 render();
