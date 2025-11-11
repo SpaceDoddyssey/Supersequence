@@ -31,6 +31,7 @@ let typedLetters = [];
 const wordsContainer = document.getElementById("words");
 const typedDisplay   = document.getElementById("typed");
 const scoreDisplay   = document.getElementById("score");
+let wordElements = [];
 
 function reset() {
   typedLetters = [];
@@ -42,8 +43,8 @@ function reset() {
 
 function newWords(){
   targetWords = pickRandomWords(NUM_WORDS_TO_SHOW);
+  createWordElements();
   reset();
-  // compareSolvers(targetWords);
 }
 
 function testNewWords(){
@@ -64,81 +65,52 @@ async function testSolvers() {
 }
 
 function updateWordCount(dropdown) {
-  wordsContainer.innerHTML = ""
   NUM_WORDS_TO_SHOW = parseInt(dropdown.value, 10);
   newWords();
+}
+
+function createWordElements() {
+  wordsContainer.innerHTML = '';
+  wordElements = [];
+
+  targetWords.forEach((word, i) => {
+    const wordEl = document.createElement('div');
+    wordEl.classList.add('word');
+
+    const filledSpan = document.createElement('span');
+    filledSpan.classList.add('filled');
+    wordEl.appendChild(filledSpan);
+
+    const nextSpan = document.createElement('span');
+    nextSpan.classList.add('next');
+    wordEl.appendChild(nextSpan);
+
+    const remainingSpan = document.createElement('span');
+    remainingSpan.classList.add('remaining');
+    wordEl.appendChild(remainingSpan);
+
+    wordsContainer.appendChild(wordEl);
+    wordElements.push({ wordEl, filledSpan, nextSpan, remainingSpan });
+  });
 }
 
 //MARK: Rendering
 // Redraws the list of words and the typed sequence on screen.
 function render() {
   targetWords.forEach((word, i) => {
-    let wordEl = wordsContainer.children[i];
     const filledCount = progressByWord[i];
     const complete = filledCount >= word.length;
+    const { wordEl, filledSpan, nextSpan, remainingSpan } = wordElements[i];
 
-    if (!wordEl) {
-      // Create element on first render
-      wordEl = document.createElement("div");
-      wordEl.classList.add("word");
-      wordsContainer.appendChild(wordEl);
+    wordEl.classList.toggle('complete', complete);
 
-      // Create child spans
-      const filledSpan = document.createElement("span");
-      filledSpan.classList.add("filled");
-      wordEl.appendChild(filledSpan);
-
-      const nextSpan = document.createElement("span");
-      nextSpan.classList.add("next");
-      wordEl.appendChild(nextSpan);
-
-      const remainingSpan = document.createElement("span");
-      remainingSpan.classList.add("remaining");
-      wordEl.appendChild(remainingSpan);
-    }
-
-    wordEl.classList.toggle("complete", complete);
-
-    const [filledSpan, nextSpan, remainingSpan] = wordEl.children;
-
-    // Helper to escape HTML for safety
-    const escapeHtml = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-    // Create per-letter HTML for a substring and a className for each char
-    const makeCharHtml = (substr, charClass) =>
-      Array.from(substr).map(ch => {
-        const safe = ch === ' ' ? '&nbsp;' : escapeHtml(ch);
-        return `<span class="char ${charClass}">${safe}</span>`;
-      }).join('');
-
-    // Render per-letter for the three spans
-    filledSpan.innerHTML = makeCharHtml(word.slice(0, filledCount), 'filled');
-    if (complete) {
-      nextSpan.innerHTML = '';
-      remainingSpan.innerHTML = '';
-    } else {
-      nextSpan.innerHTML = makeCharHtml(word[filledCount] || '', 'next');
-      remainingSpan.innerHTML = makeCharHtml(word.slice(filledCount + 1), 'remaining');
-    }
-
-
-    wordEl.onclick = () => {
-      if (complete || victory) return;
-      const nextLetter = word[filledCount];
-      if (!nextLetter) return;
-      inputLetter(nextLetter);
-    };
+    filledSpan.textContent = word.slice(0, filledCount);
+    nextSpan.textContent = complete ? '' : word[filledCount];
+    remainingSpan.textContent = complete ? '' : word.slice(filledCount + 1);
   });
 
-  // if (targetWords.length > 5) {
-  //   wordsContainer.classList.add("grid-layout");
-  // } else {
-  //   wordsContainer.classList.remove("grid-layout");
-  // }
-
-  typedDisplay.textContent = "Your Sequence: " + typedLetters.join("");
+  typedDisplay.textContent = 'Your Sequence: ' + typedLetters.join('');
 }
-
 
 
 // MARK: Input
@@ -180,4 +152,4 @@ function handleKey(event) {
 
 window.addEventListener("keydown", handleKey);
 // compareSolvers(targetWords);
-render();
+newWords();
