@@ -53,6 +53,15 @@ select {
   border-radius: 10px;
 }
 
+/* Per-letter boxes */
+.word .char {
+  display: inline-block;
+  width: 1.7ch;            /* fixed width per character */
+  min-width: 1.7ch;
+  text-align: center;    /* center letters inside each box */
+  white-space: pre;      /* preserve spaces */
+}
+
 #words {
   display: flex;
   flex-direction: column;
@@ -98,23 +107,19 @@ select {
   transition: color 0.25s ease, transform 0.25s ease;
 }
 
-.filled::after {
-  content: " "; /* preserves spacing between spans */
-}
-
 /* Next letter in an unfinished word */
 .next {
-  opacity: 0.5;
+  opacity: 0.8;
   text-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
   transition: opacity 0.3s ease, text-shadow 0.3s ease;
 }
 
 .remaining {
-  opacity: 0.3;
+  opacity: 0.6;
 }
 
 .word:not(.complete):hover .next {
-  opacity: 0.8;
+  opacity: 1;
   text-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
 }
 

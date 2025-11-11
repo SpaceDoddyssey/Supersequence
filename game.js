@@ -46,26 +46,22 @@ function newWords(){
   // compareSolvers(targetWords);
 }
 
-// function testNewWords(){
-//   targetWords = ["PIRONE",
-//   "BRITER",
-//   "BALLOON",
-//   "GRANT",
-//   'FLAMBE',
-//   "FROSTY",
-//   "RIDER"]
-//   reset();
-//   compareSolvers(targetWords);
-// }
+function testNewWords(){
+   targetWords = ["SAMPLE",
+   "PRONE",
+   "WORLD"];
+  reset();
+  compareSolvers(targetWords);
+}
 
-// async function testSolvers() {
-//   let agreement = false;
-//   do {
-//     targetWords = pickRandomWords(NUM_WORDS_TO_SHOW);
-//     reset();
-//     agreement = await compareSolvers(targetWords); // properly await the async function
-//   } while (agreement); // repeat until solvers agree
-// }
+async function testSolvers() {
+  let agreement = false;
+  do {
+    targetWords = pickRandomWords(NUM_WORDS_TO_SHOW);
+    reset();
+    agreement = await compareSolvers(targetWords); // properly await the async function
+  } while (agreement); // repeat until solvers agree
+}
 
 function updateWordCount(dropdown) {
   wordsContainer.innerHTML = ""
@@ -105,9 +101,26 @@ function render() {
 
     const [filledSpan, nextSpan, remainingSpan] = wordEl.children;
 
-    filledSpan.textContent = word.slice(0, filledCount);
-    nextSpan.textContent = complete ? "" : word[filledCount] || "";
-    remainingSpan.textContent = complete ? "" : word.slice(filledCount + 1);
+    // Helper to escape HTML for safety
+    const escapeHtml = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+    // Create per-letter HTML for a substring and a className for each char
+    const makeCharHtml = (substr, charClass) =>
+      Array.from(substr).map(ch => {
+        const safe = ch === ' ' ? '&nbsp;' : escapeHtml(ch);
+        return `<span class="char ${charClass}">${safe}</span>`;
+      }).join('');
+
+    // Render per-letter for the three spans
+    filledSpan.innerHTML = makeCharHtml(word.slice(0, filledCount), 'filled');
+    if (complete) {
+      nextSpan.innerHTML = '';
+      remainingSpan.innerHTML = '';
+    } else {
+      nextSpan.innerHTML = makeCharHtml(word[filledCount] || '', 'next');
+      remainingSpan.innerHTML = makeCharHtml(word.slice(filledCount + 1), 'remaining');
+    }
+
 
     wordEl.onclick = () => {
       if (complete || victory) return;
@@ -117,11 +130,11 @@ function render() {
     };
   });
 
-  if (targetWords.length > 5) {
-    wordsContainer.classList.add("grid-layout");
-  } else {
-    wordsContainer.classList.remove("grid-layout");
-  }
+  // if (targetWords.length > 5) {
+  //   wordsContainer.classList.add("grid-layout");
+  // } else {
+  //   wordsContainer.classList.remove("grid-layout");
+  // }
 
   typedDisplay.textContent = "Your Sequence: " + typedLetters.join("");
 }
