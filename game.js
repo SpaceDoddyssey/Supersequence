@@ -89,6 +89,8 @@ function createWordElements() {
     remainingSpan.classList.add('remaining');
     wordEl.appendChild(remainingSpan);
 
+    wordEl.addEventListener('click', () => inputLetter(word[progressByWord[i]]));
+
     wordsContainer.appendChild(wordEl);
     wordElements.push({ wordEl, filledSpan, nextSpan, remainingSpan });
   });
