@@ -74,6 +74,7 @@ button:active {
 
 .buttonDiv {
   margin: 0;
+  padding-right: 5px;
   display: flex;
   flex-direction: row;
   height: var(--bar-height);
