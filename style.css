@@ -1,31 +1,5 @@
-#topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #eecb6b;
-  border-bottom: 4px solid rgba(0, 0, 0, 0.1);
-  padding: 0.8em 1.5em;
-  position: sticky;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-}
-
-#topbar .left {
-  text-align: left;
-}
-
-#topbar .center {
-  text-align: center;
-}
-
-#topbar .right {
-  display: flex;
-  align-items: center;
-  gap: 0.6em;
-}
-
+/* MARK: Core
+*/
 :root {
   --bar-height: 1em;
 }
@@ -76,16 +50,54 @@ select {
   transition: all 0.15s ease-in-out;
 }
 
+/* MARK: Top bar
+*/
+#topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #eecb6b;
+  border-bottom: 4px solid rgba(0, 0, 0, 0.1);
+  padding: 0.8em 1.5em;
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+#topbar .left {
+  text-align: left;
+}
+
+#topbar .center {
+  text-align: center;
+}
+
+#topbar .right {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+}
+
+/* Sequence of already typed letters */
+#typed {
+  font-weight: bold;
+}
+
+/* MARK: Words 
+*/
 .word {
   font-size: 2.4rem;
   letter-spacing: 0.1em;
   margin: 0.1em;
-  display: inline-block;
   transition: color 0.3s ease;
   white-space: nowrap;
-  border: 1px solid rgba(0, 0, 0, 0.25);
+  text-align: center;
+  /* border: 1px solid rgba(0, 0, 0, 0.25); */
   padding: 0.0rem 0.6rem;
   border-radius: 10px;
+  min-height: 1lh;
 }
 
 /* Per-letter boxes */
@@ -93,28 +105,17 @@ select {
   display: inline-block;
   width: 1.7ch;            /* fixed width per character */
   min-width: 1.7ch;
-  text-align: center;    /* center letters inside each box */
-  white-space: pre;      /* preserve spaces */
+  text-align: center;
+  white-space: pre;
 }
 
 #words {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-#score {
-  min-height: 1.2em;
-  font-size: 4rem;
-  font-weight: bold;
-}
-
-#score .value {
-    color: #38c938;
-}
-
-#spacer{
-  min-height: 2em;
+  position: relative;
+  display: flex;                 /* horizontal layout */
+  justify-content: space-between;     
+  align-items: flex-start; 
+  width: 90%;
+  margin: 0em auto;
 }
 
 /* When we have many words, switch to grid layout */
@@ -125,8 +126,35 @@ select {
   justify-content: center;
   align-content: start;
   max-width: 90%;
-  margin: 0 auto;
+  margin: 0;
   white-space: nowrap;
+}
+
+#leftColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* right-align words */
+  gap: 0.0em;
+  width: 49.8%;
+}
+
+#rightColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* left-align words */
+  gap: 0.0em;
+  width: 49.8%;
+}
+
+#divider {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px; /* thin vertical line */
+  background-color: rgba(0, 0, 0, 0.25);
+  transform: translateX(-50%); /* center exactly */
+  pointer-events: none; /* don’t block clicks on words */
 }
 
 /* Finished words */
@@ -138,7 +166,7 @@ select {
 
 /* Partially typed words */
 .filled {
-  color: #cfc840;
+  color: #bca93b;
   transition: color 0.25s ease, transform 0.25s ease;
 }
 
@@ -161,4 +189,20 @@ select {
 .word.complete .filled {
   color: inherit; /* inherits the green from .word.complete */
   opacity: 1;     /* make sure everything’s fully visible */
+}
+
+/* MARK: Score
+*/
+#score {
+  min-height: 1.2em;
+  font-size: 4rem;
+  font-weight: bold;
+}
+
+#score .value {
+    color: #3eac3e;
+}
+
+#spacer{
+  min-height: 2em;
 }

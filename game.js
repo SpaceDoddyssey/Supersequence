@@ -70,29 +70,36 @@ function updateWordCount(dropdown) {
 }
 
 function createWordElements() {
-  wordsContainer.innerHTML = '';
+  const leftCol = document.getElementById("leftColumn");
+  const rightCol = document.getElementById("rightColumn");
+  leftCol.innerHTML = '';
+  rightCol.innerHTML = '';
   wordElements = [];
 
   targetWords.forEach((word, i) => {
-    const wordEl = document.createElement('div');
-    wordEl.classList.add('word');
+    const leftWord = document.createElement('div');
+    const rightWord = document.createElement('div');
+    leftWord.classList.add('word', 'leftWord');
+    rightWord.classList.add('word', 'rightWord');
 
     const filledSpan = document.createElement('span');
     filledSpan.classList.add('filled');
-    wordEl.appendChild(filledSpan);
+    leftWord.appendChild(filledSpan);
 
     const nextSpan = document.createElement('span');
     nextSpan.classList.add('next');
-    wordEl.appendChild(nextSpan);
+    rightWord.appendChild(nextSpan);
 
     const remainingSpan = document.createElement('span');
     remainingSpan.classList.add('remaining');
-    wordEl.appendChild(remainingSpan);
+    rightWord.appendChild(remainingSpan);
 
-    wordEl.addEventListener('click', () => inputLetter(word[progressByWord[i]]));
+    leftWord.addEventListener('click', () => inputLetter(word[progressByWord[i]]));
+    rightWord.addEventListener('click', () => inputLetter(word[progressByWord[i]]));
 
-    wordsContainer.appendChild(wordEl);
-    wordElements.push({ wordEl, filledSpan, nextSpan, remainingSpan });
+    leftCol.appendChild(leftWord);
+    rightCol.appendChild(rightWord);
+    wordElements.push({ leftWord, rightWord, filledSpan, nextSpan, remainingSpan });
   });
 }
 
@@ -102,18 +109,20 @@ function render() {
   targetWords.forEach((word, i) => {
     const filledCount = progressByWord[i];
     const complete = filledCount >= word.length;
-    const { wordEl, filledSpan, nextSpan, remainingSpan } = wordElements[i];
+    const { leftWord, rightWord, filledSpan, nextSpan, remainingSpan } = wordElements[i];
 
-    wordEl.classList.toggle('complete', complete);
+    leftWord.classList.toggle('complete', complete);
+    rightWord.classList.toggle('complete', complete);
 
     filledSpan.textContent = word.slice(0, filledCount);
-    nextSpan.textContent = complete ? '' : word[filledCount];
-    remainingSpan.textContent = complete ? '' : word.slice(filledCount + 1);
+    //if filledSpan is empty, make it a single space
+    if (filledSpan.textContent === '') { filledSpan.textContent = ' ';}
+    nextSpan.textContent = complete ? ' ' : word[filledCount];
+    remainingSpan.textContent = complete ? ' ' : word.slice(filledCount + 1);
   });
 
   typedDisplay.textContent = 'Your Sequence: ' + typedLetters.join('');
 }
-
 
 // MARK: Input
 function inputLetter(letter) {
