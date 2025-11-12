@@ -1,7 +1,7 @@
 /* MARK: Core
 */
 :root {
-  --bar-height: 1em;
+  --bar-height: 4.8em;
 }
 .bar { height: var(--bar-height); }
 .body { margin-top: var(--bar-height); }
@@ -20,15 +20,17 @@ h1 {
 }
 
 button {
-  border-radius: 5px;
-  border:1px solid #333;
   font-weight: bold;
   font-size: 1em;
   letter-spacing: 1px;
-  padding: 0.5em 1em;
   cursor: pointer;
   transition: all 0.05s ease-in-out;
+  height:100%;
+  all:unset;
+  border-left: 1px solid black;
+  height: var(--bar-height); 
 }
+
 
 button:hover {
   transform: scale(1.05);
@@ -39,17 +41,6 @@ button:active {
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
 }
 
-select {
-  font-weight: bold;
-  font-size: 1em;
-  padding: 0.4em 0.6em;
-  border-radius: 5px;
-  background-color: #F9F9F9;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.15s ease-in-out;
-}
-
 /* MARK: Top bar
 */
 #topbar {
@@ -58,16 +49,17 @@ select {
   align-items: center;
   background-color: #eecb6b;
   border-bottom: 4px solid rgba(0, 0, 0, 0.1);
-  padding: 0.8em 1.5em;
   position: sticky;
   top: 0;
   left: 0;
   right: 0;
   z-index: 10;
+  height: var(--bar-height);
 }
 
 #topbar .left {
   text-align: left;
+  margin: 1.2em;
 }
 
 #topbar .center {
@@ -78,6 +70,41 @@ select {
   display: flex;
   align-items: center;
   gap: 0.6em;
+}
+
+.buttonDiv {
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  height: var(--bar-height);
+  gap: 0;
+}
+
+.buttonDiv button {
+  flex: 1;
+  font-weight: bold;
+  font-size: 1em;
+  letter-spacing: 1px;
+  cursor: pointer;
+  height: var(--bar-height);
+  margin: 0;
+  padding: 0;
+  width: 7em;
+  transition: all 0.05s ease-in-out;
+}
+
+select {
+  font-weight: bold;
+  font-size: 1em;
+  padding: 0.5em 0.6em;
+  margin: 1em;
+  border-radius: 5px;
+  border: none;
+  border: 2px solid #afa886;
+  background-color: #e4daaf;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
 }
 
 /* Sequence of already typed letters */

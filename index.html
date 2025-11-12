@@ -11,24 +11,24 @@
       <h1>Supersequence</h1>
     </div>
     <div class="center">
-      <span class="howto">
         Fill words by typing letters or clicking/tapping on them<br>
         If multiple words have the same next letter, it will advance them all<br>
         Fill these words in as few letters as possible
-      </span>
     </div>
     <div class="right">
       <!-- <button type="button" id="testWordsButton" onclick="testNewWords()">Test Words</button> -->
       <!-- <button type="button" id="testSolversButton" onclick="testSolvers()">Test Solvers</button>  -->
       <!-- Default to 3 words -->
-      <button type="button" id="resetButton" onclick="reset()">Reset</button>
-      <button type="button" id="newWordsButton" onclick="newWords()">Get New Words</button>
+       <div class="buttonDiv">
       <select name="wordCount" id="wordCountDropdown" onChange="updateWordCount(this)">
         <option value="3" selected>3 words</option>
         <option value="5">5 words</option>
         <option value="8">8 words</option>
         <option value="12">12 words</option>
       </select>
+        <button id="resetButton" onclick="reset()">Reset</button>
+        <button id="newWordsButton" onclick="newWords()">Get<br>New<br>Words</button>
+      </div>
     </div>
   </div><br>
   <div id="typed"></div>
