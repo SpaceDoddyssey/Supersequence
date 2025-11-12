@@ -6,26 +6,31 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Supersequence</h1>
-  <p>
-    Fill words by typing letters or clicking/tapping on them<br>
-    If multiple words have the same next letter, it will advance them all<br>
-    Fill these words in as few letters as possible
-  </p>
-  <button type="button" id="resetButton" onclick="reset()">Reset</button>
-  <button type="button" id="newWordsButton" onclick="newWords()">Get New Words</button>
-  <!-- <button type="button" id="testWordsButton" onclick="testNewWords()">Test Words</button> -->
-  <!-- <button type="button" id="testSolversButton" onclick="testSolvers()">Test Solvers</button>  -->
-  <!-- Default to 3 words -->
-  <select name="wordCount" id="wordCountDropdown" onChange="updateWordCount(this)">
-    <option value="3" selected>3 words</option>
-    <option value="5">5 words</option>
-    <!-- <option value="7">7 words</option> -->
-    <option value="8">8 words</option>
-    <!-- <option value="9">9 words</option> -->
-    <option value="12">12 words</option>
-  </select>
-  <br><br><br>
+  <div id="topbar">
+    <div class="left">
+      <h1>Supersequence</h1>
+    </div>
+    <div class="center">
+      <span class="howto">
+        Fill words by typing letters or clicking/tapping on them<br>
+        If multiple words have the same next letter, it will advance them all<br>
+        Fill these words in as few letters as possible
+      </span>
+    </div>
+    <div class="right">
+      <!-- <button type="button" id="testWordsButton" onclick="testNewWords()">Test Words</button> -->
+      <!-- <button type="button" id="testSolversButton" onclick="testSolvers()">Test Solvers</button>  -->
+      <!-- Default to 3 words -->
+      <button type="button" id="resetButton" onclick="reset()">Reset</button>
+      <button type="button" id="newWordsButton" onclick="newWords()">Get New Words</button>
+      <select name="wordCount" id="wordCountDropdown" onChange="updateWordCount(this)">
+        <option value="3" selected>3 words</option>
+        <option value="5">5 words</option>
+        <option value="8">8 words</option>
+        <option value="12">12 words</option>
+      </select>
+    </div>
+  </div><br>
   
 
   <div id="words"></div>
@@ -35,7 +40,6 @@
   <div id="score"></div>
   <br><br>
 
-  <script src="solver.js"></script>
   <script src="words.js"></script>
   <script src="game.js"></script>
 </body>

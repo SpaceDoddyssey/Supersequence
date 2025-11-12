@@ -1,20 +1,55 @@
+#topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #eecb6b;
+  border-bottom: 4px solid rgba(0, 0, 0, 0.1);
+  padding: 0.8em 1.5em;
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+#topbar .left {
+  text-align: left;
+}
+
+#topbar .center {
+  text-align: center;
+}
+
+#topbar .right {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+}
+
+:root {
+  --bar-height: 1em;
+}
+.bar { height: var(--bar-height); }
+.body { margin-top: var(--bar-height); }
+
 body {
+  margin: 0;
   font-family: sans-serif;
   text-align: center;
-  margin-top: 1rem;
-  background-color: #FFFDF5;
+  background-color: #f3ecdb;
 }
 
 h1 {
-    font-size: 4em;
-    margin-top: 0.1em;
-    margin-bottom: 0.2em;
+    font-size: 2.5em;
+    margin-top: 0em;
+    margin-bottom: 0em;
 }
 
 button {
   border-radius: 5px;
   border:1px solid #333;
   font-weight: bold;
+  font-size: 1em;
   letter-spacing: 1px;
   padding: 0.5em 1em;
   cursor: pointer;
@@ -32,7 +67,7 @@ button:active {
 
 select {
   font-weight: bold;
-  font-size: 0.9rem;
+  font-size: 1em;
   padding: 0.4em 0.6em;
   border-radius: 5px;
   background-color: #F9F9F9;
@@ -44,7 +79,7 @@ select {
 .word {
   font-size: 2.4rem;
   letter-spacing: 0.1em;
-  margin: 0.2em;
+  margin: 0.1em;
   display: inline-block;
   transition: color 0.3s ease;
   white-space: nowrap;
