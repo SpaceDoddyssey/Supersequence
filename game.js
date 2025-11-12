@@ -1,17 +1,42 @@
 
 let NUM_WORDS_TO_SHOW = 3;
 
+// MARK: Word Selection
+// Simple validation, will probably have more complex generation rules later
+function isListValid(words) {
+  const n = words.length;
+
+  //ensure that at least 2 and at most n-1 of the initially available next letters are shared
+  let firstMoveGoodness = false;
+  let uniqueFirstLetters = [];
+  for(let i = 0; i < n; i++){
+    const firstLetter = words[i][0];
+    if(!uniqueFirstLetters.includes(firstLetter)){
+      uniqueFirstLetters.push(firstLetter);
+    }
+  }
+  if(uniqueFirstLetters.length >= 2 && uniqueFirstLetters.length <= n - 1){
+    firstMoveGoodness = true;
+  }
+
+  return firstMoveGoodness;
+}
+
 // Randomly pick N unique words from the global word list.
 // Returns an array like ["REACH", "RELISH", "LICH"].
 function pickRandomWords(count) {
   const available = [...window.WORD_LIST];
-  const chosen = [];
+  let chosen = [];
 
-  while (chosen.length < count && available.length > 0) {
-    const randomIndex = Math.floor(Math.random() * available.length);
-    const word = available.splice(randomIndex, 1)[0];
-    chosen.push(word);
-  }
+  do {
+    chosen = [];
+    // Pick unique words
+    while (chosen.length < count && available.length > 0) {
+      const randomIndex = Math.floor(Math.random() * available.length);
+      const word = available.splice(randomIndex, 1)[0];
+      chosen.push(word);
+    }
+  } while (!isListValid(chosen));
 
   return chosen;
 }
