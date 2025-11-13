@@ -1,34 +1,74 @@
 const batchSize = 700000;
 const LOGGING_DELAY = 500000;
 
-class Queue {
-  constructor() { this.head = null; this.tail = null; this._size = 0; }
-  enqueue(value) {
-    const node = { value, next: null };
-    if (this.tail) this.tail.next = node;
-    this.tail = node;
-    if (!this.head) this.head = node;
-    this._size++;
+class PriorityQueueOld {
+  constructor() { this.nodes = []; }
+
+  enqueue(item, priority) {
+    this.nodes.push({ item, priority });
+    this._bubbleUp(this.nodes.length - 1);
   }
+
   dequeue() {
-    if (!this.head) return null;
-    const val = this.head.value;
-    this.head = this.head.next;
-    if (!this.head) this.tail = null;
-    this._size--;
-    return val;
+    const smallest = this.nodes[0];
+    const end = this.nodes.pop();
+    if (this.nodes.length > 0) {
+      this.nodes[0] = end;
+      this._sinkDown(0);
+    }
+    return smallest.item;
   }
-  get length() { return this._size; }
+
+  _bubbleUp(n) {
+    const node = this.nodes[n];
+    while (n > 0) {
+      const parentN = (n - 1) >> 1;
+      const parent = this.nodes[parentN];
+      if (node.priority >= parent.priority) break;
+      this.nodes[parentN] = node;
+      this.nodes[n] = parent;
+      n = parentN;
+    }
+  }
+
+  _sinkDown(n) {
+    const length = this.nodes.length;
+    const node = this.nodes[n];
+    while (true) {
+      const child1N = (n << 1) + 1;
+      const child2N = child1N + 1;
+      let swap = null;
+
+      if (child1N < length) {
+        const child1 = this.nodes[child1N];
+        if (child1.priority < node.priority) swap = child1N;
+      }
+
+      if (child2N < length) {
+        const child2 = this.nodes[child2N];
+        if ((swap === null ? node.priority : this.nodes[child1N].priority) > child2.priority) swap = child2N;
+      }
+
+      if (swap === null) break;
+
+      this.nodes[n] = this.nodes[swap];
+      this.nodes[swap] = node;
+      n = swap;
+    }
+  }
+
+  get length() { return this.nodes.length; }
 }
 
-function findMinSequenceAsync(words) {
+//MARK: A*
+function findMinAstarOld(words) {
   return new Promise(resolve => {
-    if (words.length === 0) return resolve({ steps: 0, sequence: [] });
-
     const n = words.length;
+    if (n === 0) return resolve({ steps: 0, sequence: [] });
+
     const startTime = performance.now();
 
-    // Letter map 
+    // Letter map
     const letterMap = {};
     words.forEach((word, wi) => {
       for (let pi = 0; pi < word.length; pi++) {
@@ -38,8 +78,8 @@ function findMinSequenceAsync(words) {
       }
     });
 
-    // Packed state (BigInt) 
-    const bitsPerWord = 4; // supports <=15 letters
+    // Packed state
+    const bitsPerWord = 4;
     function encode(progress) {
       if (progress.length <= 5) {
         // For small word sets, string keys are faster in JS
@@ -47,7 +87,6 @@ function findMinSequenceAsync(words) {
       } else {
         // For larger word sets, use compact BigInt
         let code = 0n;
-        const bitsPerWord = 4; // supports up to 15 letters per word
         for (let i = 0; i < progress.length; i++) {
           code |= BigInt(progress[i]) << BigInt(bitsPerWord * i);
         }
@@ -55,21 +94,79 @@ function findMinSequenceAsync(words) {
       }
     }
 
-    // BFS queue 
-    const queue = new Queue();
-    queue.enqueue({ progress: new Array(n).fill(0), sequence: [] });
+    const wordLetterSets = words.map(word => {
+      const letters = new Array(word.length);
+      for (let i = 0; i < word.length; i++) letters[i] = word[i];
+      return letters;
+    });
+
+    // MARK: Heuristic
+    const newheuristic = (progress) => {
+      let maxRem = 0;
+      const remainingLetters = new Set();
+      for (let i = 0; i < n; i++) {
+        const rem = words[i].length - progress[i];
+        if (rem > maxRem) maxRem = rem;
+        for (let j = progress[i]; j < words[i].length; j++) remainingLetters.add(wordLetterSets[i][j]);
+      }
+      // Admissible lower bound: must perform at least the max remaining length,
+      // and also must include each distinct remaining letter at least once.
+      return Math.max(maxRem, remainingLetters.size);
+    };
+    
+    const oldheuristic = (progress) => {
+      let maxRem = 0;
+      const remainingLetters = new Set();
+
+      // Step 1: find max remaining letters of any word
+      for (let i = 0; i < n; i++) {
+        const rem = words[i].length - progress[i];
+        if (rem > maxRem) maxRem = rem;
+
+        // Add remaining letters for this word
+        for (let j = progress[i]; j < words[i].length; j++) {
+          remainingLetters.add(wordLetterSets[i][j]);
+        }
+      }
+
+      // Step 2: remove letters that appear in the word(s) with maxRem
+      const lettersInMaxRem = new Set();
+      for (let i = 0; i < n; i++) {
+        if (words[i].length - progress[i] === maxRem) {
+          for (let j = progress[i]; j < words[i].length; j++) {
+            lettersInMaxRem.add(wordLetterSets[i][j]);
+          }
+        }
+      }
+
+      // Step 3: count remaining letters not in maxRem word(s)
+      let extraLetters = 0;
+      for (const l of remainingLetters) {
+        if (!lettersInMaxRem.has(l)) extraLetters++;
+      }
+
+      return maxRem + extraLetters;
+    };
+
+    const heuristic = (progress) => Math.max(newheuristic(progress), oldheuristic(progress));
+
+    const queue = new PriorityQueueOld();
+    const startProgress = new Uint8Array(n);
+    queue.enqueue({ progress: startProgress, sequence: [] }, heuristic(startProgress));
 
     const visited = new Map();
     let processed = 0;
     let best = Infinity;
 
+    //MARK: Expand batch
     function expandBatch() {
-      const batchSize = 5000;
       let localCount = 0;
 
       while (queue.length > 0 && localCount < batchSize) {
         const { progress, sequence } = queue.dequeue();
-        if (sequence.length >= best) continue; // Early pruning
+        localCount++;
+
+        if (sequence.length >= best) continue;
 
         const key = encode(progress);
         if (visited.has(key) && visited.get(key) <= sequence.length) continue;
@@ -85,15 +182,11 @@ function findMinSequenceAsync(words) {
           return resolve({ steps: best, sequence });
         }
 
-        // Next letters using letter map 
+        // Next letters using letter map
         const nextLetters = [];
         for (const [letter, entries] of Object.entries(letterMap)) {
           let count = 0;
-          for (const { wordIndex, pos } of entries) {
-            if (progress[wordIndex] === pos) {
-              count++;
-            }
-          }
+          for (const { wordIndex, pos } of entries) if (progress[wordIndex] === pos) count++;
           if (count > 0) nextLetters.push({ letter, count });
         }
 
@@ -102,13 +195,20 @@ function findMinSequenceAsync(words) {
 
         // Generate next states
         for (const { letter } of nextLetters) {
-          const newProgress = progress.map((p, i) =>
-            p < words[i].length && words[i][p] === letter ? p + 1 : p
-          );
-          queue.enqueue({ progress: newProgress, sequence: [...sequence, letter] });
-        }
+          const newProgress = progress.slice(); // fresh copy
+          for (let i = 0; i < n; i++) {
+            if (newProgress[i] < words[i].length && words[i][newProgress[i]] === letter) {
+              newProgress[i]++;
+            }
+          }
 
-        localCount++;
+          const newSequence = sequence + letter;
+
+          queue.enqueue({
+            progress: newProgress,
+            sequence: newSequence
+          }, newSequence.length + heuristic(newProgress));
+        }
       }
 
       // Periodic logging
@@ -239,7 +339,7 @@ async function compareSolvers(words, solvers) {
     let result;
 
     if (solver === 'bruteForce') result = await bruteForceMinSequenceAsync(words);
-    else if (solver === 'solver1') result = await findMinSequenceAsync(words);
+    else if (solver === 'solver1') result = await findMinAstarOld(words);
     else if (solver === 'AStar') result = await findMinSequenceAStar(words);
     else continue;
 
@@ -286,7 +386,7 @@ async function compareSolvers(words, solvers) {
     if (solver === 'bruteForce') {
       result = await bruteForceMinSequenceAsync(words);
     } else if (solver === 'solver1') {
-      result = await findMinSequenceAsync(words);
+      result = await findMinAstarOld(words);
     } else if (solver === 'AStar') {
       result = await findMinSequenceAStar(words);
     } else {

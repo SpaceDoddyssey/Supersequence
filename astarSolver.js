@@ -7,49 +7,54 @@ class PriorityQueue {
   }
 
   dequeue() {
-    const smallest = this.nodes[0];
-    const end = this.nodes.pop();
-    if (this.nodes.length > 0) {
-      this.nodes[0] = end;
+    const nodes = this.nodes;
+    const smallest = nodes[0];
+    const end = nodes.pop();
+    if (nodes.length > 0) {
+      nodes[0] = end;
       this._sinkDown(0);
     }
     return smallest.item;
   }
 
   _bubbleUp(n) {
+    const nodes = this.nodes;
     const node = this.nodes[n];
-    while (n > 0) {
+    const nodePriority = node.priority;
+    while (n) {
       const parentN = (n - 1) >> 1;
-      const parent = this.nodes[parentN];
-      if (node.priority >= parent.priority) break;
-      this.nodes[parentN] = node;
-      this.nodes[n] = parent;
+      const parent = nodes[parentN];
+      if (nodePriority >= parent.priority) break;
+      nodes[parentN] = node;
+      nodes[n] = parent;
       n = parentN;
     }
   }
 
   _sinkDown(n) {
+    const nodes = this.nodes;
     const length = this.nodes.length;
     const node = this.nodes[n];
+    const nodePriority = node.priority;
     while (true) {
       const child1N = (n << 1) + 1;
       const child2N = child1N + 1;
       let swap = null;
 
       if (child1N < length) {
-        const child1 = this.nodes[child1N];
-        if (child1.priority < node.priority) swap = child1N;
+        const child1 = nodes[child1N];
+        if (child1.priority < nodePriority) swap = child1N;
       }
 
       if (child2N < length) {
-        const child2 = this.nodes[child2N];
-        if ((swap === null ? node.priority : this.nodes[child1N].priority) > child2.priority) swap = child2N;
+        const child2 = nodes[child2N];
+        if ((swap === null ? nodePriority : nodes[child1N].priority) > child2.priority) swap = child2N;
       }
 
       if (swap === null) break;
 
-      this.nodes[n] = this.nodes[swap];
-      this.nodes[swap] = node;
+      nodes[n] = nodes[swap];
+      nodes[swap] = node;
       n = swap;
     }
   }
@@ -74,6 +79,7 @@ function findMinSequenceAStar(words) {
         letterMap[letter].push({ wordIndex: wi, pos: pi });
       }
     });
+    const letterEntries = Object.entries(letterMap);
 
     // Packed state
     const bitsPerWord = 4;
@@ -84,8 +90,11 @@ function findMinSequenceAStar(words) {
       } else {
         // For larger word sets, use compact BigInt
         let code = 0n;
+        const b = BigInt(bitsPerWord);
+        let shift = 0n;
         for (let i = 0; i < progress.length; i++) {
-          code |= BigInt(progress[i]) << BigInt(bitsPerWord * i);
+          code |= BigInt(progress[i]) << shift;
+          shift += b;
         }
         return code;
       }
@@ -96,15 +105,16 @@ function findMinSequenceAStar(words) {
       for (let i = 0; i < word.length; i++) letters[i] = word[i];
       return letters;
     });
+    const wordLengths = words.map(w => w.length);
 
     // MARK: Heuristic
     const newheuristic = (progress) => {
       let maxRem = 0;
       const remainingLetters = new Set();
       for (let i = 0; i < n; i++) {
-        const rem = words[i].length - progress[i];
+        const rem = wordLengths[i] - progress[i];
         if (rem > maxRem) maxRem = rem;
-        for (let j = progress[i]; j < words[i].length; j++) remainingLetters.add(wordLetterSets[i][j]);
+        for (let j = progress[i]; j < wordLengths[i]; j++) remainingLetters.add(wordLetterSets[i][j]);
       }
       // Admissible lower bound: must perform at least the max remaining length,
       // and also must include each distinct remaining letter at least once.
@@ -112,16 +122,15 @@ function findMinSequenceAStar(words) {
     };
     
     const oldheuristic = (progress) => {
+      // Step 1: find max remaining letters of any word
       let maxRem = 0;
       const remainingLetters = new Set();
-
-      // Step 1: find max remaining letters of any word
       for (let i = 0; i < n; i++) {
-        const rem = words[i].length - progress[i];
+        const rem = wordLengths[i] - progress[i];
         if (rem > maxRem) maxRem = rem;
 
         // Add remaining letters for this word
-        for (let j = progress[i]; j < words[i].length; j++) {
+        for (let j = progress[i]; j < wordLengths[i]; j++) {
           remainingLetters.add(wordLetterSets[i][j]);
         }
       }
@@ -129,8 +138,8 @@ function findMinSequenceAStar(words) {
       // Step 2: remove letters that appear in the word(s) with maxRem
       const lettersInMaxRem = new Set();
       for (let i = 0; i < n; i++) {
-        if (words[i].length - progress[i] === maxRem) {
-          for (let j = progress[i]; j < words[i].length; j++) {
+        if (wordLengths[i] - progress[i] === maxRem) {
+          for (let j = progress[i]; j < wordLengths[i]; j++) {
             lettersInMaxRem.add(wordLetterSets[i][j]);
           }
         }
@@ -172,7 +181,9 @@ function findMinSequenceAStar(words) {
         processed++;
 
         // Completion check
-        if (progress.every((p, i) => p >= words[i].length)) {
+        let done = true;
+        for (let i = 0; i < n; i++) { if (progress[i] < wordLengths[i]) { done = false; break; } }
+        if (done) {
           best = sequence.length;
           const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
           console.log(`✅ Minimal sequence found in ${best} letters after ${processed.toLocaleString()} states (${elapsed}s)`);
@@ -181,7 +192,7 @@ function findMinSequenceAStar(words) {
 
         // Next letters using letter map
         const nextLetters = [];
-        for (const [letter, entries] of Object.entries(letterMap)) {
+        for (const [letter, entries] of letterEntries) {
           let count = 0;
           for (const { wordIndex, pos } of entries) if (progress[wordIndex] === pos) count++;
           if (count > 0) nextLetters.push({ letter, count });
@@ -192,9 +203,9 @@ function findMinSequenceAStar(words) {
 
         // Generate next states
         for (const { letter } of nextLetters) {
-          const newProgress = progress.slice(); // fresh copy
+          const newProgress = new Uint8Array(progress);
           for (let i = 0; i < n; i++) {
-            if (newProgress[i] < words[i].length && words[i][newProgress[i]] === letter) {
+            if (newProgress[i] < wordLengths[i] && words[i][newProgress[i]] === letter) {
               newProgress[i]++;
             }
           }

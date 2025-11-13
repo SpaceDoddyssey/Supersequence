@@ -93,7 +93,7 @@ async function runSelectedSolver(value) {
   console.log("Running solver:", value);
   document.getElementById('solverDropdown').value = '';
   if (value === 'bruteForce') await bruteForceMinSequenceAsync(targetWords);
-  if (value === 'solver1') await findMinSequenceAsync(targetWords);
+  if (value === 'solver1') await findMinAstarOld(targetWords);
   if (value === 'AStar') await findMinSequenceAStar(targetWords);
 }
 
@@ -108,7 +108,7 @@ async function compareAllSolvers() {
 }
 
 // Compare solver1 vs AStar over 100 random sets
-async function compareSolver1vsAStarLooped(wordCount = targetWords.length, iterations = 300) {
+async function compareSolver1vsAStarLooped(wordCount = targetWords.length, iterations = 1000) {
   return await compareSolversLooped(wordCount, ['solver1', 'AStar'], iterations);
 }
 
