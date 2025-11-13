@@ -1,25 +1,15 @@
 class PriorityQueue {
-  constructor() { this.nodes = []; }
+  constructor() {
+    this.nodes = [];
+  }
 
   enqueue(item, priority) {
-    this.nodes.push({ item, priority });
-    this._bubbleUp(this.nodes.length - 1);
-  }
-
-  dequeue() {
     const nodes = this.nodes;
-    const smallest = nodes[0];
-    const end = nodes.pop();
-    if (nodes.length > 0) {
-      nodes[0] = end;
-      this._sinkDown(0);
-    }
-    return smallest.item;
-  }
+    const node = { item, priority };
+    nodes.push(node);
+    let n = nodes.length - 1;
 
-  _bubbleUp(n) {
-    const nodes = this.nodes;
-    const node = this.nodes[n];
+    // Bubble up
     const nodePriority = node.priority;
     while (n) {
       const parentN = (n - 1) >> 1;
@@ -31,36 +21,53 @@ class PriorityQueue {
     }
   }
 
-  _sinkDown(n) {
+  dequeue() {
     const nodes = this.nodes;
-    const length = this.nodes.length;
-    const node = this.nodes[n];
-    const nodePriority = node.priority;
-    while (true) {
-      const child1N = (n << 1) + 1;
-      const child2N = child1N + 1;
-      let swap = null;
+    const length = nodes.length;
+    if (!length) return undefined;
 
-      if (child1N < length) {
-        const child1 = nodes[child1N];
-        if (child1.priority < nodePriority) swap = child1N;
+    const smallest = nodes[0];
+    const end = nodes.pop();
+    if (length > 1) {
+      nodes[0] = end;
+
+      // Sink down
+      const node = end;
+      const nodePriority = node.priority;
+      let n = 0;
+      const len = length - 1;
+      while (true) {
+        const child1N = (n << 1) + 1;
+        const child2N = child1N + 1;
+        let swap = null;
+
+        if (child1N < len) {
+          const child1 = nodes[child1N];
+          if (child1.priority < nodePriority) swap = child1N;
+        }
+
+        if (child2N < len) {
+          const child2 = nodes[child2N];
+          const child1Priority = swap === null ? nodePriority : nodes[child1N].priority;
+          if (nodes[child2N].priority < child1Priority) swap = child2N;
+        }
+
+        if (swap === null) break;
+
+        nodes[n] = nodes[swap];
+        nodes[swap] = node;
+        n = swap;
       }
-
-      if (child2N < length) {
-        const child2 = nodes[child2N];
-        if ((swap === null ? nodePriority : nodes[child1N].priority) > child2.priority) swap = child2N;
-      }
-
-      if (swap === null) break;
-
-      nodes[n] = nodes[swap];
-      nodes[swap] = node;
-      n = swap;
     }
+
+    return smallest.item;
   }
 
-  get length() { return this.nodes.length; }
+  get length() {
+    return this.nodes.length;
+  }
 }
+
 
 //MARK: A*
 function findMinSequenceAStar(words) {
@@ -112,9 +119,11 @@ function findMinSequenceAStar(words) {
       let maxRem = 0;
       const remainingLetters = new Set();
       for (let i = 0; i < n; i++) {
-        const rem = wordLengths[i] - progress[i];
+        const wordLengthI = wordLengths[i];
+        const progressI = progress[i];
+        const rem = wordLengthI - progressI;
         if (rem > maxRem) maxRem = rem;
-        for (let j = progress[i]; j < wordLengths[i]; j++) remainingLetters.add(wordLetterSets[i][j]);
+        for (let j = progressI; j < wordLengthI; j++) remainingLetters.add(wordLetterSets[i][j]);
       }
       // Admissible lower bound: must perform at least the max remaining length,
       // and also must include each distinct remaining letter at least once.
@@ -126,11 +135,13 @@ function findMinSequenceAStar(words) {
       let maxRem = 0;
       const remainingLetters = new Set();
       for (let i = 0; i < n; i++) {
-        const rem = wordLengths[i] - progress[i];
+        const wordLengthI = wordLengths[i];
+        const progressI = progress[i];
+        const rem = wordLengthI - progressI;
         if (rem > maxRem) maxRem = rem;
 
         // Add remaining letters for this word
-        for (let j = progress[i]; j < wordLengths[i]; j++) {
+        for (let j = progressI; j < wordLengthI; j++) {
           remainingLetters.add(wordLetterSets[i][j]);
         }
       }
@@ -138,8 +149,10 @@ function findMinSequenceAStar(words) {
       // Step 2: remove letters that appear in the word(s) with maxRem
       const lettersInMaxRem = new Set();
       for (let i = 0; i < n; i++) {
-        if (wordLengths[i] - progress[i] === maxRem) {
-          for (let j = progress[i]; j < wordLengths[i]; j++) {
+        const wordLengthI = wordLengths[i];
+        const progressI = progress[i];
+        if (wordLengthI - progressI === maxRem) {
+          for (let j = progressI; j < wordLengthI; j++) {
             lettersInMaxRem.add(wordLetterSets[i][j]);
           }
         }
@@ -169,7 +182,9 @@ function findMinSequenceAStar(words) {
       let localCount = 0;
 
       while (queue.length > 0 && localCount < batchSize) {
-        const { progress, sequence } = queue.dequeue();
+        const node = queue.dequeue();
+        if (!node) break; // queue is empty
+        const { progress, sequence } = node;
         localCount++;
 
         if (sequence.length >= best) continue;

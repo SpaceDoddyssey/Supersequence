@@ -339,7 +339,7 @@ async function compareSolvers(words, solvers) {
     let result;
 
     if (solver === 'bruteForce') result = await bruteForceMinSequenceAsync(words);
-    else if (solver === 'solver1') result = await findMinAstarOld(words);
+    else if (solver === 'OldAStar') result = await findMinAstarOld(words);
     else if (solver === 'AStar') result = await findMinSequenceAStar(words);
     else continue;
 
@@ -367,12 +367,12 @@ async function compareSolvers(words, solvers) {
 
 // Compare solver1 vs AStar
 async function compareSolver1vsAStar(words) {
-  return await compareSolvers(words, ['solver1', 'AStar']);
+  return await compareSolvers(words, ['OldAStar', 'OptimizedAStar']);
 }
 
 // Compare all three
 async function compareAllSolvers(words) {
-  return await compareSolvers(words, ['bruteForce', 'solver1', 'AStar']);
+  return await compareSolvers(words, ['bruteForce', 'OldAStar', 'OptimizedAStar']);
 }
 
 // Loop test for 100 random sets
@@ -385,9 +385,9 @@ async function compareSolvers(words, solvers) {
 
     if (solver === 'bruteForce') {
       result = await bruteForceMinSequenceAsync(words);
-    } else if (solver === 'solver1') {
+    } else if (solver === 'OldAStar') {
       result = await findMinAstarOld(words);
-    } else if (solver === 'AStar') {
+    } else if (solver === 'OptimizedAStar') {
       result = await findMinSequenceAStar(words);
     } else {
       console.warn(`Unknown solver: ${solver}`);
@@ -432,16 +432,16 @@ async function compareSolvers(words, solvers) {
 
 // Compare solver1 vs AStar
 async function compareSolver1vsAStar(words) {
-  return await compareSolvers(words, ['solver1', 'AStar']);
+  return await compareSolvers(words, ['OldAStar', 'AStar']);
 }
 
 // Compare all three
 async function compareAllSolvers(words) {
-  return await compareSolvers(words, ['bruteForce', 'solver1', 'AStar']);
+  return await compareSolvers(words, ['bruteForce', 'OldAStar', 'AStar']);
 }
 
 // Looped comparison with averages and speed stats
-async function compareSolversLooped(wordCount, solverSet = ['bruteForce', 'solver1', 'AStar'], iterations = 100) {
+async function compareSolversLooped(wordCount, solverSet = ['bruteForce', 'OldAStar', 'AStar'], iterations = 100) {
   let matches = 0;
   let mismatches = 0;
   const totalTimeStart = performance.now();
