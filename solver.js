@@ -1,5 +1,5 @@
-const batchSize = 70000;
-const LOGGING_DELAY = 40000;
+const batchSize = 700000;
+const LOGGING_DELAY = 500000;
 
 class Queue {
   constructor() { this.head = null; this.tail = null; this._size = 0; }
@@ -320,7 +320,7 @@ async function compareSolvers(words, solvers) {
   // Show all results
   console.log("Results:");
   for (const [solver, { steps, sequence, time }] of Object.entries(results)) {
-    console.log(`${solver}: ${steps} steps | ${sequence.join("")} | ${time.toFixed(2)} ms`);
+    console.log(`${solver}: ${steps} steps | ${sequence} | ${time.toFixed(2)} ms`);
   }
 
   // Determine fastest solver

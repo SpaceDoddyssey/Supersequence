@@ -19,7 +19,7 @@ class PriorityQueue {
   _bubbleUp(n) {
     const node = this.nodes[n];
     while (n > 0) {
-      const parentN = Math.floor((n + 1) / 2) - 1;
+      const parentN = (n - 1) >> 1;
       const parent = this.nodes[parentN];
       if (node.priority >= parent.priority) break;
       this.nodes[parentN] = node;
@@ -32,8 +32,8 @@ class PriorityQueue {
     const length = this.nodes.length;
     const node = this.nodes[n];
     while (true) {
-      const child2N = (n + 1) * 2;
-      const child1N = child2N - 1;
+      const child1N = (n << 1) + 1;
+      const child2N = child1N + 1;
       let swap = null;
 
       if (child1N < length) {
@@ -57,12 +57,12 @@ class PriorityQueue {
   get length() { return this.nodes.length; }
 }
 
-
+//MARK: A*
 function findMinSequenceAStar(words) {
   return new Promise(resolve => {
-    if (words.length === 0) return resolve({ steps: 0, sequence: [] });
-
     const n = words.length;
+    if (n === 0) return resolve({ steps: 0, sequence: [] });
+
     const startTime = performance.now();
 
     // Letter map
@@ -84,7 +84,6 @@ function findMinSequenceAStar(words) {
       } else {
         // For larger word sets, use compact BigInt
         let code = 0n;
-        const bitsPerWord = 4; // supports up to 15 letters per word
         for (let i = 0; i < progress.length; i++) {
           code |= BigInt(progress[i]) << BigInt(bitsPerWord * i);
         }
@@ -92,56 +91,63 @@ function findMinSequenceAStar(words) {
       }
     }
 
-    // Heuristic: max remaining length
-const heuristic = (progress) => {
-  const n = words.length;
-  let maxRem = 0;
-  const remainingLetters = new Set();
+    const wordLetterSets = words.map(word => {
+      const letters = new Array(word.length);
+      for (let i = 0; i < word.length; i++) letters[i] = word[i];
+      return letters;
+    });
 
-  // Step 1: find max remaining letters of any word
-  for (let i = 0; i < n; i++) {
-    const rem = words[i].length - progress[i];
-    if (rem > maxRem) maxRem = rem;
+    // MARK: Heuristic
+    const heuristic = (progress) => {
+      let maxRem = 0;
+      const remainingLetters = new Set();
 
-    // Collect all remaining letters
-    for (let j = progress[i]; j < words[i].length; j++) {
-      remainingLetters.add(words[i][j]);
-    }
-  }
+      // Step 1: find max remaining letters of any word
+      for (let i = 0; i < n; i++) {
+        const rem = words[i].length - progress[i];
+        if (rem > maxRem) maxRem = rem;
 
-  // Step 2: remove letters that appear in the word(s) with maxRem
-  const lettersInMaxRem = new Set();
-  for (let i = 0; i < n; i++) {
-    if (words[i].length - progress[i] === maxRem) {
-      for (let j = progress[i]; j < words[i].length; j++) {
-        lettersInMaxRem.add(words[i][j]);
+        // Add remaining letters for this word
+        for (let j = progress[i]; j < words[i].length; j++) {
+          remainingLetters.add(wordLetterSets[i][j]);
+        }
       }
-    }
-  }
 
-  // Step 3: count remaining letters not in maxRem word(s)
-  let extraLetters = 0;
-  for (const l of remainingLetters) {
-    if (!lettersInMaxRem.has(l)) extraLetters++;
-  }
+      // Step 2: remove letters that appear in the word(s) with maxRem
+      const lettersInMaxRem = new Set();
+      for (let i = 0; i < n; i++) {
+        if (words[i].length - progress[i] === maxRem) {
+          for (let j = progress[i]; j < words[i].length; j++) {
+            lettersInMaxRem.add(wordLetterSets[i][j]);
+          }
+        }
+      }
 
-  return maxRem + extraLetters;
-};
+      // Step 3: count remaining letters not in maxRem word(s)
+      let extraLetters = 0;
+      for (const l of remainingLetters) {
+        if (!lettersInMaxRem.has(l)) extraLetters++;
+      }
 
+      return maxRem + extraLetters;
+    };
 
     const queue = new PriorityQueue();
-    const startProgress = new Array(n).fill(0);
+    const startProgress = new Uint8Array(n);
     queue.enqueue({ progress: startProgress, sequence: [] }, heuristic(startProgress));
 
     const visited = new Map();
     let processed = 0;
     let best = Infinity;
 
+    //MARK: Expand batch
     function expandBatch() {
       let localCount = 0;
 
       while (queue.length > 0 && localCount < batchSize) {
         const { progress, sequence } = queue.dequeue();
+        localCount++;
+
         if (sequence.length >= best) continue;
 
         const key = encode(progress);
@@ -171,27 +177,24 @@ const heuristic = (progress) => {
 
         // Generate next states
         for (const { letter } of nextLetters) {
-          const oldProgress = new Array(n);
+          const newProgress = progress.slice(); // fresh copy
           for (let i = 0; i < n; i++) {
-            oldProgress[i] = progress[i];
-            if (progress[i] < words[i].length && words[i][progress[i]] === letter) {
-              progress[i]++;
+            if (newProgress[i] < words[i].length && words[i][newProgress[i]] === letter) {
+              newProgress[i]++;
             }
           }
 
+          const newSequence = sequence + letter;
+
           queue.enqueue({
-            progress: [...progress],
-            sequence: [...sequence, letter]
-          }, sequence.length + 1 + heuristic(progress));
-
-          for (let i = 0; i < n; i++) progress[i] = oldProgress[i];
+            progress: newProgress,
+            sequence: newSequence
+          }, newSequence.length + heuristic(newProgress));
         }
-
-        localCount++;
       }
 
       // Periodic logging
-      if (processed % 40000 < batchSize) {
+      if (processed % LOGGING_DELAY < batchSize) {
         const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
         console.log(`⏱️ ${processed.toLocaleString()} states processed | Queue: ${queue.length} | Elapsed: ${elapsed}s`);
       }
