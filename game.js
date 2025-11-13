@@ -88,27 +88,33 @@ function pickWordPreset(preset){
   document.getElementById('presetDropdown').value = '';
 }
 
-async function testBruteForceSolver() {
-  const brute = bruteForceMinSequenceAsync(targetWords);
-  return brute;
-}
-
-function runSelectedSolver(value) {
+async function runSelectedSolver(value) {
   if (!value) return;
   console.log("Running solver:", value);
   document.getElementById('solverDropdown').value = '';
-  if (value === 'bruteForce') return testBruteForceSolver();
-  if (value === 'solver1') return testSolver1();
+  if (value === 'bruteForce') await bruteForceMinSequenceAsync(targetWords);
+  if (value === 'solver1') await findMinSequenceAsync(targetWords);
+  if (value === 'AStar') await findMinSequenceAStar(targetWords);
 }
 
-async function testSolver1() {
-  let agreement = false;
-  let i = 0;
-  do {
-    i++;
-    reset();
-    agreement = await compareSolvers(targetWords); // properly await the async function
-  } while (agreement && i < 1); // repeat until solvers agree
+// Compare solver1 vs AStar
+async function compareSolver1vsAStar() {
+  return await compareSolvers(targetWords, ['solver1', 'AStar']);
+}
+
+// Compare all three
+async function compareAllSolvers() {
+  return await compareSolvers(targetWords, ['bruteForce', 'solver1', 'AStar']);
+}
+
+// Compare solver1 vs AStar over 100 random sets
+async function compareSolver1vsAStarLooped(wordCount = targetWords.length, iterations = 200) {
+  return await compareSolversLooped(wordCount, ['solver1', 'AStar'], iterations);
+}
+
+// Compare all three solvers over 100 random sets
+async function compareAllSolversLooped(wordCount = targetWords.length, iterations = 200) {
+  return await compareSolversLooped(wordCount, ['bruteForce', 'solver1', 'AStar'], iterations);
 }
 
 // MARK: UI Handlers
@@ -210,5 +216,4 @@ function handleKey(event) {
 
 
 window.addEventListener("keydown", handleKey);
-// compareSolvers(targetWords);
 newWords();

@@ -11,9 +11,9 @@
 </head>
 <body>
   <div id="topbar">
-    <div class="left">
+    <!-- <div class="left">
       <h1>Supersequence</h1>
-    </div>
+    </div> -->
     <div class="buttonDiv">
         <button id="howToPlayButton">How To Play</button>
         <!-- Fill words by typing letters or clicking/tapping on them<br>
@@ -21,12 +21,13 @@
         Fill these words in as few letters as possible -->
     </div>
     <div class="right">
-      <!-- <button type="button" id="testWordsButton" onclick="testNewWords()">Test Words</button> -->
       <!-- Default to 3 words -->
        <div class="buttonDiv">
         <select name="wordCount" id="wordCountDropdown" onChange="updateWordCount(this)">
           <option value="3" selected>3 words</option>
           <option value="5">5 words</option>
+          <option value="6">6 words</option>
+          <option value="7">7 words</option>
           <option value="8">8 words</option>
           <option value="12">12 words</option>
         </select>
@@ -42,9 +43,14 @@
           <option value="" selected>Choose solver</option>
           <option value="bruteForce">Brute</option>
           <option value="solver1">BFS</option>
+          <option value="AStar">A*</option>
         </select>
-        <button id="resetButton" onclick="reset()">Reset</button>
-        <button id="newWordsButton" onclick="newWords()">Get<br>New<br>Words</button>
+        <button onclick="compareSolver1vsAStar()">Compare Fast</button>
+        <button onclick="compareAllSolvers()">Compare All</button>
+        <button onclick="compareSolver1vsAStarLooped()">Compare Fast (L)</button>
+        <button onclick="compareAllSolversLooped()">Compare All (L)</button>
+        <button onclick="reset()">Reset</button>
+        <button onclick="newWords()">Get<br>New<br>Words</button>
       </div>
     </div>
   </div><br>
@@ -63,6 +69,7 @@
   <br>
 
   <script src="solver.js"></script>
+  <script src="astarSolver.js"></script>
   <script src="words.js"></script>
   <script src="game.js"></script>
 </body>
