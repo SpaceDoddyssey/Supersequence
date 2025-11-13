@@ -98,7 +98,20 @@ function findMinSequenceAStar(words) {
     });
 
     // MARK: Heuristic
-    const heuristic = (progress) => {
+    const newheuristic = (progress) => {
+      let maxRem = 0;
+      const remainingLetters = new Set();
+      for (let i = 0; i < n; i++) {
+        const rem = words[i].length - progress[i];
+        if (rem > maxRem) maxRem = rem;
+        for (let j = progress[i]; j < words[i].length; j++) remainingLetters.add(wordLetterSets[i][j]);
+      }
+      // Admissible lower bound: must perform at least the max remaining length,
+      // and also must include each distinct remaining letter at least once.
+      return Math.max(maxRem, remainingLetters.size);
+    };
+    
+    const oldheuristic = (progress) => {
       let maxRem = 0;
       const remainingLetters = new Set();
 
@@ -131,6 +144,8 @@ function findMinSequenceAStar(words) {
 
       return maxRem + extraLetters;
     };
+
+    const heuristic = (progress) => Math.max(newheuristic(progress), oldheuristic(progress));
 
     const queue = new PriorityQueue();
     const startProgress = new Uint8Array(n);
