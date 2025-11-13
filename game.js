@@ -72,23 +72,46 @@ function newWords(){
   reset();
 }
 
-function testNewWords(){
-   targetWords = ["SAMPLE",
-   "PRONE",
-   "WORLD"];
+// MARK: Solver Testing
+const PRESET_WORD_SETS = [
+  ["REACH", "RELISH", "LICH"],
+  ["SAMPLE", "PRONE", "WORLD", "TOUCH"],
+  ["TRAIN", "BRAIN", "DRAIN", "GRAIN", "CHAIN", "PLAIN", "STAIN"],
+  ["SAMPLE", "PLAIN", "MATCH", "SIGHT", "DRAIN", "CROON", "ALONE", "BLEACH", "PLANT"],
+  ["FLICK", "PRONE", "TRAIN", "DRAIN", "BRISK", "TOUCH", "STAIN"]
+];
+
+function pickWordPreset(preset){
+  targetWords = PRESET_WORD_SETS[preset-1];
+  createWordElements();
   reset();
-  compareSolvers(targetWords);
+  document.getElementById('presetDropdown').value = '';
 }
 
-async function testSolvers() {
+async function testBruteForceSolver() {
+  const brute = bruteForceMinSequenceAsync(targetWords);
+  return brute;
+}
+
+function runSelectedSolver(value) {
+  if (!value) return;
+  console.log("Running solver:", value);
+  document.getElementById('solverDropdown').value = '';
+  if (value === 'bruteForce') return testBruteForceSolver();
+  if (value === 'solver1') return testSolver1();
+}
+
+async function testSolver1() {
   let agreement = false;
+  let i = 0;
   do {
-    targetWords = pickRandomWords(NUM_WORDS_TO_SHOW);
+    i++;
     reset();
     agreement = await compareSolvers(targetWords); // properly await the async function
-  } while (agreement); // repeat until solvers agree
+  } while (agreement && i < 1); // repeat until solvers agree
 }
 
+// MARK: UI Handlers
 function updateWordCount(dropdown) {
   NUM_WORDS_TO_SHOW = parseInt(dropdown.value, 10);
   newWords();

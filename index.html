@@ -14,22 +14,35 @@
     <div class="left">
       <h1>Supersequence</h1>
     </div>
-    <div class="center">
-        Fill words by typing letters or clicking/tapping on them<br>
+    <div class="buttonDiv">
+        <button id="howToPlayButton">How To Play</button>
+        <!-- Fill words by typing letters or clicking/tapping on them<br>
         If multiple words have the same next letter, it will advance them all<br>
-        Fill these words in as few letters as possible
+        Fill these words in as few letters as possible -->
     </div>
     <div class="right">
       <!-- <button type="button" id="testWordsButton" onclick="testNewWords()">Test Words</button> -->
-      <!-- <button type="button" id="testSolversButton" onclick="testSolvers()">Test Solvers</button>  -->
       <!-- Default to 3 words -->
        <div class="buttonDiv">
-      <select name="wordCount" id="wordCountDropdown" onChange="updateWordCount(this)">
-        <option value="3" selected>3 words</option>
-        <option value="5">5 words</option>
-        <option value="8">8 words</option>
-        <option value="12">12 words</option>
-      </select>
+        <select name="wordCount" id="wordCountDropdown" onChange="updateWordCount(this)">
+          <option value="3" selected>3 words</option>
+          <option value="5">5 words</option>
+          <option value="8">8 words</option>
+          <option value="12">12 words</option>
+        </select>
+        <select id="presetDropdown" onchange="pickWordPreset(+this.value)">
+          <option value="" selected>Choose preset</option>
+          <option value="1">Preset 1</option>
+          <option value="2">Preset 2</option>
+          <option value="3">Preset 3</option>
+          <option value="4">Preset 4</option>
+          <option value="5">Preset 5</option>
+        </select>
+        <select id="solverDropdown" onchange="runSelectedSolver(this.value)">
+          <option value="" selected>Choose solver</option>
+          <option value="bruteForce">Brute</option>
+          <option value="solver1">BFS</option>
+        </select>
         <button id="resetButton" onclick="reset()">Reset</button>
         <button id="newWordsButton" onclick="newWords()">Get<br>New<br>Words</button>
       </div>
@@ -49,6 +62,7 @@
   <div id="score"></div>
   <br>
 
+  <script src="solver.js"></script>
   <script src="words.js"></script>
   <script src="game.js"></script>
 </body>

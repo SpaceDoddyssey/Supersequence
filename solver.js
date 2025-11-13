@@ -69,7 +69,7 @@ function findMinSequenceAsync(words) {
         if (progress.every((p, i) => p >= words[i].length)) {
           best = sequence.length;
           const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
-          console.log(`Minimal sequence found in ${best} letters after ${processed.toLocaleString()} states (${elapsed}s)`);
+          console.log(`✅ Minimal sequence found in ${best} letters after ${processed.toLocaleString()} states (${elapsed}s)`);
           return resolve({ steps: best, sequence });
         }
 
@@ -114,54 +114,105 @@ function findMinSequenceAsync(words) {
 
 
 // MARK: Brute-Force Solver
-function bruteForceMinSequence(words) {
-  const n = words.length;
-  const start = new Array(n).fill(0);
-  const visited = new Map();
-  let minSteps = Infinity;
-  let minSequence = null;
+function bruteForceMinSequenceAsync(words) {
+  return new Promise(resolve => {
+    if (words.length === 0) return resolve({ minSteps: 0, minSequence: [] });
 
-  const queue = [{ progress: start, sequence: [] }];
-  const serialize = (prog) => prog.join(",");
+    const n = words.length;
+    const startTime = performance.now();
 
-  while (queue.length > 0) {
-    const { progress, sequence } = queue.shift();
-    const key = serialize(progress);
-    if (visited.has(key) && sequence.length >= visited.get(key)) continue;
-    visited.set(key, sequence.length);
-
-    if (progress.every((p, i) => p >= words[i].length)) {
-      if (sequence.length < minSteps) {
-        minSteps = sequence.length;
-        minSequence = sequence;
+    // Build letter map: which positions each letter appears at in each word
+    const letterMap = {};
+    words.forEach((word, wi) => {
+      for (let pi = 0; pi < word.length; pi++) {
+        const letter = word[pi];
+        if (!letterMap[letter]) letterMap[letter] = [];
+        letterMap[letter].push({ wordIndex: wi, pos: pi });
       }
-      continue;
+    });
+
+    const queue = [{ progress: new Array(n).fill(0), sequence: [] }];
+    const visited = new Map();
+    let processed = 0;
+    let minSteps = Infinity;
+    let minSequence = null;
+
+    function encode(progress) {
+      return progress.join(",");
     }
 
-    // Next letters
-    const nextLetters = new Set();
-    for (let i = 0; i < n; i++) {
-      if (progress[i] < words[i].length) nextLetters.add(words[i][progress[i]]);
+    function processBatch() {
+      const batchSize = 5000;
+      let localCount = 0;
+
+      while (queue.length > 0 && localCount < batchSize) {
+        const { progress, sequence } = queue.shift();
+        processed++;
+
+        if (sequence.length >= minSteps) continue;
+
+        const key = encode(progress);
+        if (visited.has(key) && sequence.length >= visited.get(key)) continue;
+        visited.set(key, sequence.length);
+
+        // Completion check
+        if (progress.every((p, i) => p >= words[i].length)) {
+          if (sequence.length < minSteps) {
+            minSteps = sequence.length;
+            minSequence = sequence;
+            const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+            console.log(`✅ Minimal sequence found in ${minSteps} letters after ${processed.toLocaleString()} states (${elapsed}s)`);
+          }
+          continue;
+        }
+
+        // Next letters using letter map
+        const nextLetters = [];
+        for (const [letter, entries] of Object.entries(letterMap)) {
+          let count = 0;
+          for (const { wordIndex, pos } of entries) {
+            if (progress[wordIndex] === pos) count++;
+          }
+          if (count > 0) nextLetters.push({ letter, count });
+        }
+
+        // Prioritize letters that advance most words
+        nextLetters.sort((a, b) => b.count - a.count);
+
+        for (const { letter } of nextLetters) {
+          const newProgress = progress.map((p, i) =>
+            p < words[i].length && words[i][p] === letter ? p + 1 : p
+          );
+          queue.push({ progress: newProgress, sequence: [...sequence, letter] });
+        }
+
+        localCount++;
+      }
+
+      // Logging every ~20k states
+      if (processed % 20000 < batchSize) {
+        const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+        console.log(`⏱️ ${processed.toLocaleString()} states processed | Queue: ${queue.length} | Elapsed: ${elapsed}s`);
+      }
+
+      if (queue.length > 0) {
+        setTimeout(processBatch, 0);
+      } else {
+        resolve({ minSteps, minSequence });
+      }
     }
 
-    for (const letter of nextLetters) {
-      const newProgress = progress.map((p, i) =>
-        p < words[i].length && words[i][p] === letter ? p + 1 : p
-      );
-      queue.push({ progress: newProgress, sequence: [...sequence, letter] });
-    }
-  }
-
-  return { minSteps, minSequence };
+    processBatch();
+  });
 }
+
 
 // MARK: Compare Solvers
 async function compareSolvers(words) {
 //   console.log("Running brute-force solver...");
 
 //   console.log("Running optimized async solver...");
-  const optimized = await findMinSequenceAsync(words);
-  console.log(`Optimized solver result: ${optimized.steps} letters | sequence: ${optimized.sequence.join("")}`);
+  await findMinSequenceAsync(words);
   return true;
 //   const brute = bruteForceMinSequence(words);
 //   console.log(`Brute-force result: ${brute.minSteps} letters | sequence: ${brute.minSequence.join("")}`);

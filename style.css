@@ -19,19 +19,6 @@ h1 {
     margin-bottom: 0em;
 }
 
-button {
-  font-weight: bold;
-  font-size: 1em;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: all 0.05s ease-in-out;
-  height:100%;
-  all:unset;
-  border-left: 1px solid black;
-  height: var(--bar-height); 
-}
-
-
 button:hover {
   transform: scale(1.05);
 }
@@ -77,8 +64,25 @@ button:active {
   padding-right: 5px;
   display: flex;
   flex-direction: row;
+  align-items: center;
   height: var(--bar-height);
   gap: 0;
+}
+
+button {
+  font-weight: bold;
+  font-size: 1em;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.05s ease-in-out;
+  height:100%;
+  all:unset;
+  border-left: 1px solid black;
+  height: var(--bar-height); 
+}
+
+.buttonDiv button {
+  border-right: 1px solid black;
 }
 
 .buttonDiv button {
