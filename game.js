@@ -108,12 +108,12 @@ async function compareAllSolvers() {
 }
 
 // Compare solver1 vs AStar over 100 random sets
-async function compareSolver1vsAStarLooped(wordCount = targetWords.length, iterations = 200) {
+async function compareSolver1vsAStarLooped(wordCount = targetWords.length, iterations = 50) {
   return await compareSolversLooped(wordCount, ['solver1', 'AStar'], iterations);
 }
 
 // Compare all three solvers over 100 random sets
-async function compareAllSolversLooped(wordCount = targetWords.length, iterations = 200) {
+async function compareAllSolversLooped(wordCount = targetWords.length, iterations = 50) {
   return await compareSolversLooped(wordCount, ['bruteForce', 'solver1', 'AStar'], iterations);
 }
 
