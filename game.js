@@ -97,26 +97,6 @@ async function runSelectedSolver(value) {
   if (value === 'AStar') await findMinSequenceAStar(targetWords);
 }
 
-// Compare solver1 vs AStar
-async function compareSolver1vsAStar() {
-  return await compareSolvers(targetWords, ['OldAStar', 'OptimizedAStar']);
-}
-
-// Compare all three
-async function compareAllSolvers() {
-  return await compareSolvers(targetWords, ['bruteForce', 'OldAStar', 'OptimizedAStar']);
-}
-
-// Compare solver1 vs AStar over 100 random sets
-async function compareSolver1vsAStarLooped(wordCount = targetWords.length, iterations = 1000) {
-  return await compareSolversLooped(wordCount, ['OldAStar', 'OptimizedAStar'], iterations);
-}
-
-// Compare all three solvers over 100 random sets
-async function compareAllSolversLooped(wordCount = targetWords.length, iterations = 300) {
-  return await compareSolversLooped(wordCount, ['bruteForce', 'OldAStar', 'OptimizedAStar'], iterations);
-}
-
 // MARK: UI Handlers
 function updateWordCount(dropdown) {
   NUM_WORDS_TO_SHOW = parseInt(dropdown.value, 10);
@@ -212,8 +192,6 @@ function inputLetter(letter) {
 function handleKey(event) {
   inputLetter(event.key);
 }
-
-
 
 window.addEventListener("keydown", handleKey);
 newWords();

@@ -68,6 +68,9 @@ class PriorityQueue {
   }
 }
 
+let oldheuristicVictories = 0;
+let newheuristicVictories = 0;
+let ties = 0;
 
 //MARK: A*
 function findMinSequenceAStar(words) {
@@ -91,20 +94,17 @@ function findMinSequenceAStar(words) {
     // Packed state
     const bitsPerWord = 4;
     function encode(progress) {
-      if (progress.length <= 5) {
-        // For small word sets, string keys are faster in JS
-        return progress.join(",");
-      } else {
-        // For larger word sets, use compact BigInt
-        let code = 0n;
-        const b = BigInt(bitsPerWord);
-        let shift = 0n;
-        for (let i = 0; i < progress.length; i++) {
-          code |= BigInt(progress[i]) << shift;
-          shift += b;
-        }
-        return code;
+      // For small word sets, about <= 5, string keys are slightly faster than bigInt
+      // But it's such a small improvement that I'd rather save the if on large sets
+      // return progress.join(",");
+      let code = 0n;
+      const b = BigInt(bitsPerWord);
+      let shift = 0n;
+      for (let i = 0; i < progress.length; i++) {
+        code |= BigInt(progress[i]) << shift;
+        shift += b;
       }
+      return code;
     }
 
     const wordLetterSets = words.map(word => {
@@ -114,8 +114,7 @@ function findMinSequenceAStar(words) {
     });
     const wordLengths = words.map(w => w.length);
 
-    // MARK: Heuristic
-    const newheuristic = (progress) => {
+    const heuristic = (progress) => {
       let maxRem = 0;
       const remainingLetters = new Set();
       for (let i = 0; i < n; i++) {
@@ -124,26 +123,6 @@ function findMinSequenceAStar(words) {
         const rem = wordLengthI - progressI;
         if (rem > maxRem) maxRem = rem;
         for (let j = progressI; j < wordLengthI; j++) remainingLetters.add(wordLetterSets[i][j]);
-      }
-      // Admissible lower bound: must perform at least the max remaining length,
-      // and also must include each distinct remaining letter at least once.
-      return Math.max(maxRem, remainingLetters.size);
-    };
-    
-    const oldheuristic = (progress) => {
-      // Step 1: find max remaining letters of any word
-      let maxRem = 0;
-      const remainingLetters = new Set();
-      for (let i = 0; i < n; i++) {
-        const wordLengthI = wordLengths[i];
-        const progressI = progress[i];
-        const rem = wordLengthI - progressI;
-        if (rem > maxRem) maxRem = rem;
-
-        // Add remaining letters for this word
-        for (let j = progressI; j < wordLengthI; j++) {
-          remainingLetters.add(wordLetterSets[i][j]);
-        }
       }
 
       // Step 2: remove letters that appear in the word(s) with maxRem
@@ -164,10 +143,8 @@ function findMinSequenceAStar(words) {
         if (!lettersInMaxRem.has(l)) extraLetters++;
       }
 
-      return maxRem + extraLetters;
-    };
-
-    const heuristic = (progress) => Math.max(newheuristic(progress), oldheuristic(progress));
+      return Math.max(maxRem + extraLetters, remainingLetters.size);
+    }
 
     const queue = new PriorityQueue();
     const startProgress = new Uint8Array(n);

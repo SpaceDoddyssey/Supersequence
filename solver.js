@@ -77,21 +77,22 @@ function findMinAstarOld(words) {
         letterMap[letter].push({ wordIndex: wi, pos: pi });
       }
     });
+    const letterEntries = Object.entries(letterMap);
 
     // Packed state
     const bitsPerWord = 4;
     function encode(progress) {
-      if (progress.length <= 5) {
-        // For small word sets, string keys are faster in JS
-        return progress.join(",");
-      } else {
-        // For larger word sets, use compact BigInt
-        let code = 0n;
-        for (let i = 0; i < progress.length; i++) {
-          code |= BigInt(progress[i]) << BigInt(bitsPerWord * i);
-        }
-        return code;
+      // For small word sets, about <= 5, string keys are slightly faster than bigInt
+      // But it's such a small improvement that I'd rather save the if on large sets
+      // return progress.join(",");
+      let code = 0n;
+      const b = BigInt(bitsPerWord);
+      let shift = 0n;
+      for (let i = 0; i < progress.length; i++) {
+        code |= BigInt(progress[i]) << shift;
+        shift += b;
       }
+      return code;
     }
 
     const wordLetterSets = words.map(word => {
@@ -99,15 +100,18 @@ function findMinAstarOld(words) {
       for (let i = 0; i < word.length; i++) letters[i] = word[i];
       return letters;
     });
+    const wordLengths = words.map(w => w.length);
 
     // MARK: Heuristic
     const newheuristic = (progress) => {
       let maxRem = 0;
       const remainingLetters = new Set();
       for (let i = 0; i < n; i++) {
-        const rem = words[i].length - progress[i];
+        const wordLengthI = wordLengths[i];
+        const progressI = progress[i];
+        const rem = wordLengthI - progressI;
         if (rem > maxRem) maxRem = rem;
-        for (let j = progress[i]; j < words[i].length; j++) remainingLetters.add(wordLetterSets[i][j]);
+        for (let j = progressI; j < wordLengthI; j++) remainingLetters.add(wordLetterSets[i][j]);
       }
       // Admissible lower bound: must perform at least the max remaining length,
       // and also must include each distinct remaining letter at least once.
@@ -115,16 +119,17 @@ function findMinAstarOld(words) {
     };
     
     const oldheuristic = (progress) => {
+      // Step 1: find max remaining letters of any word
       let maxRem = 0;
       const remainingLetters = new Set();
-
-      // Step 1: find max remaining letters of any word
       for (let i = 0; i < n; i++) {
-        const rem = words[i].length - progress[i];
+        const wordLengthI = wordLengths[i];
+        const progressI = progress[i];
+        const rem = wordLengthI - progressI;
         if (rem > maxRem) maxRem = rem;
 
         // Add remaining letters for this word
-        for (let j = progress[i]; j < words[i].length; j++) {
+        for (let j = progressI; j < wordLengthI; j++) {
           remainingLetters.add(wordLetterSets[i][j]);
         }
       }
@@ -132,8 +137,10 @@ function findMinAstarOld(words) {
       // Step 2: remove letters that appear in the word(s) with maxRem
       const lettersInMaxRem = new Set();
       for (let i = 0; i < n; i++) {
-        if (words[i].length - progress[i] === maxRem) {
-          for (let j = progress[i]; j < words[i].length; j++) {
+        const wordLengthI = wordLengths[i];
+        const progressI = progress[i];
+        if (wordLengthI - progressI === maxRem) {
+          for (let j = progressI; j < wordLengthI; j++) {
             lettersInMaxRem.add(wordLetterSets[i][j]);
           }
         }
@@ -148,7 +155,11 @@ function findMinAstarOld(words) {
       return maxRem + extraLetters;
     };
 
-    const heuristic = (progress) => Math.max(newheuristic(progress), oldheuristic(progress));
+    const heuristic = (progress) => {
+      const newH = newheuristic(progress);
+      const oldH = oldheuristic(progress);
+      return Math.max(newH, oldH);
+    }
 
     const queue = new PriorityQueueOld();
     const startProgress = new Uint8Array(n);
@@ -163,7 +174,9 @@ function findMinAstarOld(words) {
       let localCount = 0;
 
       while (queue.length > 0 && localCount < batchSize) {
-        const { progress, sequence } = queue.dequeue();
+        const node = queue.dequeue();
+        if (!node) break; // queue is empty
+        const { progress, sequence } = node;
         localCount++;
 
         if (sequence.length >= best) continue;
@@ -175,7 +188,9 @@ function findMinAstarOld(words) {
         processed++;
 
         // Completion check
-        if (progress.every((p, i) => p >= words[i].length)) {
+        let done = true;
+        for (let i = 0; i < n; i++) { if (progress[i] < wordLengths[i]) { done = false; break; } }
+        if (done) {
           best = sequence.length;
           const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
           console.log(`✅ Minimal sequence found in ${best} letters after ${processed.toLocaleString()} states (${elapsed}s)`);
@@ -184,7 +199,7 @@ function findMinAstarOld(words) {
 
         // Next letters using letter map
         const nextLetters = [];
-        for (const [letter, entries] of Object.entries(letterMap)) {
+        for (const [letter, entries] of letterEntries) {
           let count = 0;
           for (const { wordIndex, pos } of entries) if (progress[wordIndex] === pos) count++;
           if (count > 0) nextLetters.push({ letter, count });
@@ -195,9 +210,9 @@ function findMinAstarOld(words) {
 
         // Generate next states
         for (const { letter } of nextLetters) {
-          const newProgress = progress.slice(); // fresh copy
+          const newProgress = new Uint8Array(progress);
           for (let i = 0; i < n; i++) {
-            if (newProgress[i] < words[i].length && words[i][newProgress[i]] === letter) {
+            if (newProgress[i] < wordLengths[i] && words[i][newProgress[i]] === letter) {
               newProgress[i]++;
             }
           }
@@ -329,50 +344,24 @@ function bruteForceMinSequenceAsync(words) {
 
 
 // MARK: Compare Solvers
-// Compare solvers (sync or async)
-// Compare solvers with optional async mode
-async function compareSolvers(words, solvers) {
-  const results = {};
-
-  for (const solver of solvers) {
-    const start = performance.now();
-    let result;
-
-    if (solver === 'bruteForce') result = await bruteForceMinSequenceAsync(words);
-    else if (solver === 'OldAStar') result = await findMinAstarOld(words);
-    else if (solver === 'AStar') result = await findMinSequenceAStar(words);
-    else continue;
-
-    const end = performance.now();
-    results[solver] = {
-      steps: result.minSteps ?? result.steps,
-      sequence: result.minSequence ?? result.sequence,
-      time: end - start
-    };
-  }
-
-  // Compare steps and find fastest (same as before)
-  const [firstSolver, ...others] = Object.keys(results);
-  const referenceSteps = results[firstSolver].steps;
-  let allMatch = true;
-
-  for (const solver of others) {
-    if (results[solver].steps !== referenceSteps) allMatch = false;
-  }
-
-  const fastest = Object.entries(results).reduce((a, b) => (a[1].time < b[1].time ? a : b))[0][0];
-
-  return { results, allMatch, fastest };
-}
-
 // Compare solver1 vs AStar
-async function compareSolver1vsAStar(words) {
-  return await compareSolvers(words, ['OldAStar', 'OptimizedAStar']);
+async function compareSolver1vsAStar() {
+  return await compareSolvers(targetWords, ['OldAStar', 'OptimizedAStar']);
 }
 
 // Compare all three
-async function compareAllSolvers(words) {
-  return await compareSolvers(words, ['bruteForce', 'OldAStar', 'OptimizedAStar']);
+async function compareAllSolvers() {
+  return await compareSolvers(targetWords, ['bruteForce', 'OldAStar', 'OptimizedAStar']);
+}
+
+// Compare solver1 vs AStar over 100 random sets
+async function compareSolver1vsAStarLooped(wordCount = targetWords.length, iterations = 400) {
+  return await compareSolversLooped(wordCount, ['OldAStar', 'OptimizedAStar'], iterations);
+}
+
+// Compare all three solvers over 100 random sets
+async function compareAllSolversLooped(wordCount = targetWords.length, iterations = 300) {
+  return await compareSolversLooped(wordCount, ['bruteForce', 'OldAStar', 'OptimizedAStar'], iterations);
 }
 
 // Loop test for 100 random sets
@@ -430,20 +419,13 @@ async function compareSolvers(words, solvers) {
   return { results, allMatch, fastest };
 }
 
-// Compare solver1 vs AStar
-async function compareSolver1vsAStar(words) {
-  return await compareSolvers(words, ['OldAStar', 'AStar']);
-}
-
-// Compare all three
-async function compareAllSolvers(words) {
-  return await compareSolvers(words, ['bruteForce', 'OldAStar', 'AStar']);
-}
-
 // Looped comparison with averages and speed stats
 async function compareSolversLooped(wordCount, solverSet = ['bruteForce', 'OldAStar', 'AStar'], iterations = 100) {
   let matches = 0;
   let mismatches = 0;
+  oldheuristicVictories = 0;
+  newheuristicVictories = 0;
+  ties = 0;
   const totalTimeStart = performance.now();
 
   const solverStats = {};
@@ -481,6 +463,10 @@ async function compareSolversLooped(wordCount, solverSet = ['bruteForce', 'OldAS
     const avg = (stats.totalTime / iterations).toFixed(2);
     console.log(`${solver}: avg ${avg} ms | fastest ${stats.wins} times`);
   }
+
+  console.log(`Old H wins: ${oldheuristicVictories}`)
+  console.log(`New H wins: ${newheuristicVictories}`)
+  console.log(`Ties: ${ties}`)
 
   return { matches, mismatches, totalTime, solverStats };
 }
