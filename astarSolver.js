@@ -68,10 +68,6 @@ class PriorityQueue {
   }
 }
 
-let oldheuristicVictories = 0;
-let newheuristicVictories = 0;
-let ties = 0;
-
 //MARK: A*
 function findMinSequenceAStar(words) {
   return new Promise(resolve => {

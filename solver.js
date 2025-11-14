@@ -1,4 +1,4 @@
-const batchSize = 700000;
+const batchSize = 200000;
 const LOGGING_DELAY = 500000;
 
 class PriorityQueueOld {
@@ -355,7 +355,7 @@ async function compareAllSolvers() {
 }
 
 // Compare solver1 vs AStar over 100 random sets
-async function compareSolver1vsAStarLooped(wordCount = targetWords.length, iterations = 400) {
+async function compareSolver1vsAStarLooped(wordCount = targetWords.length, iterations = 500) {
   return await compareSolversLooped(wordCount, ['OldAStar', 'OptimizedAStar'], iterations);
 }
 
