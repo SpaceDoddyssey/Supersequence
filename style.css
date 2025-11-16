@@ -35,7 +35,7 @@ button:active {
   justify-content: space-between;
   align-items: center;
   background-color: #eecb6b;
-  border-bottom: 4px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 4px solid #d6b660;
   position: sticky;
   top: 0;
   left: 0;
@@ -237,4 +237,64 @@ select {
 
 #spacer{
   min-height: 2em;
+}
+
+
+.h2p-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10,10,10,0.45);
+  z-index: 200;
+  padding: 1.5rem;
+}
+
+.h2p-overlay.hidden { 
+  display: none; 
+}
+
+.h2p-dialog {
+  background: #f3ecdb;
+  border-radius: 18px;
+  border: 4px solid #d6b660;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.35);
+}
+
+.h2p-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: #eecb6b;
+  border-bottom: 4px solid #d6b660;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+}
+
+.h2p-header h2 { 
+  margin: 0; 
+  font-size: 1.25rem; 
+}
+
+.h2p-body {
+  padding: 1rem 1.25rem;
+  overflow: auto;
+  font-size: 1rem;
+  color: #222;
+  line-height: 1.45;
+}
+
+.h2p-ok {
+  all: unset;
+  cursor: pointer;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  font-weight: bold;
+  background: #eecb6b;
+  border: 1px solid rgba(0,0,0,1);
+}
+.h2p-ok:hover { 
+  transform: scale(1.05);
 }

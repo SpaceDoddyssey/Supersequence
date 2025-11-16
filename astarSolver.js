@@ -1,3 +1,4 @@
+// MARK: PQueue
 class PriorityQueue {
   constructor() {
     this.nodes = [];
@@ -110,6 +111,7 @@ function findMinSequenceAStar(words) {
     });
     const wordLengths = words.map(w => w.length);
 
+    //MARK: Heuristic
     const heuristic = (progress) => {
       let maxRem = 0;
       const remainingLetters = new Set();
