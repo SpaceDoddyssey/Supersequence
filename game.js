@@ -56,6 +56,7 @@ let typedLetters = [];
 const wordsContainer = document.getElementById("words");
 const typedDisplay   = document.getElementById("typed");
 const scoreDisplay   = document.getElementById("score");
+const bestPosDisplay = document.getElementById("bestPossible");
 let wordElements = [];
 
 function reset() {
@@ -68,6 +69,30 @@ function reset() {
 
 function newWords(){
   targetWords = pickRandomWords(NUM_WORDS_TO_SHOW);
+  createWordElements();
+  reset();
+  bestPosDisplay.textContent = ``;
+}
+
+function loadDaily(){
+  //Seed the random number generator with today's date to get a consistent daily puzzle
+  const today = new Date();
+  const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+  
+  // Store the current RNG state and create a seeded generator
+  const originalRandom = Math.random;
+  let seedValue = seed;
+  
+  Math.random = function() {
+    seedValue = (seedValue * 9301 + 49297) % 233280;
+    return seedValue / 233280;
+  };
+  
+  targetWords = pickRandomWords(8);
+  
+  // Restore the original RNG
+  Math.random = originalRandom;
+  
   createWordElements();
   reset();
 }
@@ -155,7 +180,8 @@ function render() {
     remainingSpan.textContent = complete ? ' ' : word.slice(filledCount + 1);
   });
 
-  typedDisplay.textContent = 'Your Sequence: ' + typedLetters.join('');
+  let typedString = typedLetters.length == 0 ? 'None yet' : typedLetters.join('');
+  typedDisplay.textContent = 'Your Sequence: ' + typedString;
 }
 
 // MARK: Input
