@@ -121,7 +121,6 @@ select {
 */
 .word {
   font-size: 2.4rem;
-  letter-spacing: 0.1em;
   margin: 0.1em;
   transition: color 0.3s ease;
   white-space: nowrap;
@@ -135,10 +134,13 @@ select {
 /* Per-letter boxes */
 .word .char {
   display: inline-block;
-  width: 1.7ch;            /* fixed width per character */
-  min-width: 1.7ch;
+  width: 1.2em;            /* fixed width per character */
+  border: 0px solid #222;
+  border-radius: 5px;
+  background:#e4daaf;
   text-align: center;
   white-space: pre;
+  margin-inline: 10px;
 }
 
 #words {

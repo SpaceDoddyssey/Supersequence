@@ -173,11 +173,18 @@ function render() {
     leftWord.classList.toggle('complete', complete);
     rightWord.classList.toggle('complete', complete);
 
-    filledSpan.textContent = word.slice(0, filledCount);
-    //if filledSpan is empty, make it a single space
-    if (filledSpan.textContent === '') { filledSpan.textContent = ' ';}
-    nextSpan.textContent = complete ? ' ' : word[filledCount];
-    remainingSpan.textContent = complete ? ' ' : word.slice(filledCount + 1);
+    const wrapCharacters = (text) => {
+      return text.split('').map(char => `<span class="char">${char}</span>`).join('');
+    };
+
+    const filledText = word.slice(0, filledCount);
+    filledSpan.innerHTML = filledText.length === 0 ? '<span class="char"></span>' : wrapCharacters(filledText);
+    
+    const nextText = complete ? '' : word[filledCount];
+    nextSpan.innerHTML = `<span class="char">${nextText}</span>`;
+    
+    const remainingText = complete ? '' : word.slice(filledCount + 1);
+    remainingSpan.innerHTML = remainingText.length === 0 ? '' : wrapCharacters(remainingText);
   });
 
   let typedString = typedLetters.length == 0 ? 'None yet' : typedLetters.join('');
